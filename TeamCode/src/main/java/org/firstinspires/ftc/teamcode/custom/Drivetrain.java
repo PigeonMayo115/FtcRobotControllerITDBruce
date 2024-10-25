@@ -35,26 +35,28 @@ public class Drivetrain {
 
     }
 
-    public void driveLeft(){
-        setMotPow(1,1,1,1);
+    public void driveLeft(double spdMult){
+        setMotPow(1,1,1,1,spdMult);
     }
-    public void driveRight(){
-        setMotPow(-1,1,-1,1);
+    public void driveRight(double spdMult){
+        setMotPow(-1,1,-1,1,spdMult);
     }
-    public void driveForward(){
-        setMotPow(1,-1,1,-1);
+    public void driveForward(double spdMult){
+        setMotPow(1,-1,1,-1,spdMult);
     }
-    public void driveReverse(){
-        setMotPow(-1,1,-1,-1);
+    public void driveReverse(double spdMult){
+        setMotPow(-1,1,-1,-1, spdMult);
     }
     
-    public void stickDrive (double xCmd, double yCmd, double rxCmd){
+    public void stickDrive (double xCmd, double yCmd, double rxCmd, double spdMult){
         double denominator = Math.max(Math.abs(yCmd) + Math.abs(xCmd) + Math.abs(rxCmd), 1);
         setMotPow(
                 (yCmd + xCmd - rxCmd) / denominator, 
                 (yCmd - xCmd + rxCmd) / denominator, 
                 (yCmd - xCmd - rxCmd) / denominator,
-                (yCmd + xCmd + rxCmd) / denominator
+                (yCmd + xCmd + rxCmd) / denominator,
+                spdMult
+
                  );
     }
 
@@ -64,11 +66,11 @@ public class Drivetrain {
     frontRightPower = (y - x - rx) / denominator;
     backRightPower = (y + x + rx) / denominator; */
 
-    public void setMotPow(double flMotPow, double blMotPow, double frMotPow, double brMotPow){
-        flMot.setPower(flMotPow);
-        blMot.setPower(blMotPow);
-        frMot.setPower(frMotPow);
-        brMot.setPower(brMotPow);
+    public void setMotPow(double flMotPow, double blMotPow, double frMotPow, double brMotPow, double spdMult){
+        flMot.setPower(flMotPow * spdMult);
+        blMot.setPower(blMotPow * spdMult);
+        frMot.setPower(frMotPow * spdMult);
+        brMot.setPower(brMotPow * spdMult);
 
     }
 

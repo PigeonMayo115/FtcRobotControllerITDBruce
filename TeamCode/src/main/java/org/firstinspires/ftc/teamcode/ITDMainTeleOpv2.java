@@ -169,31 +169,31 @@ public class ITDMainTeleOpv2 extends OpMode
         // owen wanted when the left stick is not being used
         
         if (!( y == 0 ) || !( x == 0 ) || !( rx == 0)) {
-            myDrivetrain.stickDrive(x, y, rx);
+            myDrivetrain.stickDrive(x, y, rx, speedModifier);
         }
         else if (dpadUp1 || dpadDown1 || dpadLeft1 || dpadRight1){
           if (dpadUp1) {
-            myDrivetrain.driveForward();
+            myDrivetrain.driveForward(speedModifier);
           }
           else if (dpadDown1){
-            myDrivetrain.driveReverse();
+            myDrivetrain.driveReverse(speedModifier);
           }
           
           if (dpadRight1) {
-            myDrivetrain.driveRight();
+            myDrivetrain.driveRight(speedModifier);
           }
           else if (dpadLeft1) {
-            myDrivetrain.driveLeft();
+            myDrivetrain.driveLeft(speedModifier);
           }
         }else{
-            myDrivetrain.setMotPow(0,0,0,0);
+            myDrivetrain.setMotPow(0,0,0,0, 0);
         }
 
         myDrivetrain.setMotPow(
-                frontLeftPower*speedModifier,
-                backLeftPower*speedModifier,
-                frontRightPower*speedModifier,
-                backRightPower*speedModifier
+                frontLeftPower,
+                backLeftPower,
+                frontRightPower,
+                backRightPower,speedModifier
         );
 
 
