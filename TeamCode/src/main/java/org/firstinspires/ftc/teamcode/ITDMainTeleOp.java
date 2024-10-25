@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -37,6 +36,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.custom.Lift;
 
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -52,9 +53,25 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="ITDDualGamepadv2ls", group="Iterative OpMode")
-@Disabled
-public class ITDDualGamepadv2ls extends OpMode
+/*
+welcome!
+
+This is the first iteration of what will be considered the main TeleOp program for the 2024-25
+into the deep season. This is an updated version of the code that includes all basic functions of the robot
+including drivetrain, wrist servo, intake, arm actuation, and arm elevation. The code right now is pretty messy,
+but this is the first iteration of the program where I have made an attempt to condense it. I started with the
+linear slides, so you can compare this program with the previous version called "ITDDualGamepadV2"
+The logic for the linear slides is mostly done in the file "Lift", so for any confusion look there
+good luck
+p.s. I will do better commenting in future programs, I just wrote this one at like 9pm when I was exhausted
+lacked time
+
+Last updated on 10/24/2024
+
+ */
+
+@TeleOp(name="ITDMainTeleOp", group="Iterative OpMode")
+public class ITDMainTeleOp extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -66,21 +83,12 @@ public class ITDDualGamepadv2ls extends OpMode
     CRServo crServoRubberWheel = null;
     Servo wristServo = null;
     DcMotor armMotor = null;
-    DcMotor linearSlideMotorLeft = null;
-    DcMotor linearSlideMotorRight = null;
     int positionArmMotor = 0;
-    int positionLinearSlideMotorLeft = 0;
-    int positionLinearSlideMotorMinLeft = 0;
-    int positionLinearSlideMotorMaxLeft = 0;
-    int positionLinearSlideMotorRight = 0;
-    int positionLinearSlideMotorMinRight = 0;
-    int positionLinearSlideMotorMaxRight = 0;
-    int positionLinearSlideMotorAvg = 0;
     double frontLeftPower = 0;
     double backLeftPower = 0;
     double frontRightPower = 0;
     double backRightPower = 0;
-
+    Lift myLift;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -98,28 +106,11 @@ public class ITDDualGamepadv2ls extends OpMode
         crServoRubberWheel = hardwareMap.crservo.get("crServoRubberWheel");
         wristServo = hardwareMap.servo.get("wristServo");
         armMotor = hardwareMap.dcMotor.get("armMotor");
-        linearSlideMotorLeft = hardwareMap.dcMotor.get("linearSlideMotorLeft");
-        linearSlideMotorRight = hardwareMap.dcMotor.get("linearSlideMotorRight");
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
-
-
-
-        linearSlideMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        positionLinearSlideMotorMinLeft = linearSlideMotorLeft.getCurrentPosition();
-        positionLinearSlideMotorMinRight = linearSlideMotorRight.getCurrentPosition();
-        positionLinearSlideMotorMaxLeft = linearSlideMotorLeft.getCurrentPosition() + 2304;
-        positionLinearSlideMotorMaxRight = linearSlideMotorRight.getCurrentPosition() + 2304;
-        linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
-        linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
-        linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
+        myLift = new Lift(hardwareMap);     // New instance of the "lift" class
 
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
@@ -147,10 +138,7 @@ public class ITDDualGamepadv2ls extends OpMode
         armMotor.setTargetPosition(positionArmMotor);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
-        linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
-        linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        myLift.holdBottom();    // Hang on!
 
     }
     /*
@@ -257,34 +245,7 @@ public class ITDDualGamepadv2ls extends OpMode
           positionArmMotor = armMotor.getCurrentPosition();
         }
        //linear slide
-        positionLinearSlideMotorAvg = (int)((positionLinearSlideMotorLeft + positionLinearSlideMotorRight)/2);
-
-        if (ry2 == 0){
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorLeft);
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorRight);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if ((positionLinearSlideMotorLeft < positionLinearSlideMotorMinLeft) && !(ry2 <= 0)){
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if (((positionLinearSlideMotorLeft > positionLinearSlideMotorMaxLeft) && !(ry2 >= 0))) {
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMaxLeft);
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMaxRight);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else {
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            linearSlideMotorLeft.setPower(ry2);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            linearSlideMotorRight.setPower(ry2);
-            positionLinearSlideMotorLeft = linearSlideMotorLeft.getCurrentPosition();
-            positionLinearSlideMotorRight = linearSlideMotorRight.getCurrentPosition();
-        }
-
-      
-
+        myLift.movSlide(-ry2);
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
