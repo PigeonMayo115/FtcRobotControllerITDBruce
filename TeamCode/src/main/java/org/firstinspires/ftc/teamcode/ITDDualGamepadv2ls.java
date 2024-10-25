@@ -51,8 +51,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="ITDDualGamepadv2", group="Iterative OpMode")
-public class ITDDualGamepadv2 extends OpMode
+@TeleOp(name="ITDDualGamepadv2ls", group="Iterative OpMode")
+public class ITDDualGamepadv2ls extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -99,6 +99,10 @@ public class ITDDualGamepadv2 extends OpMode
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
+
+        linearSlideMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -125,8 +129,8 @@ public class ITDDualGamepadv2 extends OpMode
         armMotor.setTargetPosition(positionArmMotor);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        positionLinearSlideMotorMin = (linearSlideMotorLeft.getCurrentPosition() + linearSlideMotorRight.getCurrentPosition()) / 2;
-        positionLinearSlideMotorMin = (linearSlideMotorLeft.getCurrentPosition() + linearSlideMotorRight.getCurrentPosition()) / 2;
+        positionLinearSlideMotorMin = linearSlideMotorLeft.getCurrentPosition();
+        positionLinearSlideMotorMax = linearSlideMotorLeft.getCurrentPosition() + 2304;
         linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMin);
         linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMin);
