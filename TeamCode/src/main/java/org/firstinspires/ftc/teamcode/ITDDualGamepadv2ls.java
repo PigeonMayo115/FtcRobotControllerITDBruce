@@ -67,9 +67,13 @@ public class ITDDualGamepadv2ls extends OpMode
     DcMotor linearSlideMotorLeft = null;
     DcMotor linearSlideMotorRight = null;
     int positionArmMotor = 0;
-    int positionLinearSlideMotor = 0;
-    int positionLinearSlideMotorMin = 0;
-    int positionLinearSlideMotorMax = 0;
+    int positionLinearSlideMotorLeft = 0;
+    int positionLinearSlideMotorMinLeft = 0;
+    int positionLinearSlideMotorMaxLeft = 0;
+    int positionLinearSlideMotorRight = 0;
+    int positionLinearSlideMotorMinRight = 0;
+    int positionLinearSlideMotorMaxRight = 0;
+    int positionLinearSlideMotorAvg = 0;
     double frontLeftPower = 0;
     double backLeftPower = 0;
     double frontRightPower = 0;
@@ -100,8 +104,20 @@ public class ITDDualGamepadv2ls extends OpMode
 
 
 
+
+
         linearSlideMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
         linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        positionLinearSlideMotorMinLeft = linearSlideMotorLeft.getCurrentPosition();
+        positionLinearSlideMotorMinRight = linearSlideMotorRight.getCurrentPosition();
+        positionLinearSlideMotorMaxLeft = linearSlideMotorLeft.getCurrentPosition() + 2304;
+        positionLinearSlideMotorMaxRight = linearSlideMotorRight.getCurrentPosition() + 2304;
+        linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
+        linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
+        linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
 
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
@@ -129,11 +145,9 @@ public class ITDDualGamepadv2ls extends OpMode
         armMotor.setTargetPosition(positionArmMotor);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        positionLinearSlideMotorMin = linearSlideMotorLeft.getCurrentPosition();
-        positionLinearSlideMotorMax = linearSlideMotorLeft.getCurrentPosition() + 2304;
-        linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMin);
+        linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
         linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMin);
+        linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
         linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
@@ -157,8 +171,6 @@ public class ITDDualGamepadv2ls extends OpMode
         boolean dpadDown1 = gamepad1.dpad_down;
         boolean dpadLeft1 = gamepad1.dpad_left;
         boolean dpadRight1 = gamepad1.dpad_right;
-        /*boolean dpadUp2 = gamepad2.dpad_up;
-        boolean dpadDown2 = gamepad2.dpad_down; */
         double speedModifier = 1-(gamepad1.left_trigger*0.8);
 
         // Does math and calibrates the trigger positions to be inline to the servo's requirements
@@ -243,29 +255,30 @@ public class ITDDualGamepadv2ls extends OpMode
           positionArmMotor = armMotor.getCurrentPosition();
         }
        //linear slide
-
+        positionLinearSlideMotorAvg = (int)((positionLinearSlideMotorLeft + positionLinearSlideMotorRight)/2);
 
         if (ry2 == 0){
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotor);
+            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorLeft);
             linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotor);
+            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorRight);
             linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if ((positionLinearSlideMotor < positionLinearSlideMotorMin) && !(ry2 <= 0)){
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMin);
+        } else if ((positionLinearSlideMotorLeft < positionLinearSlideMotorMinLeft) && !(ry2 <= 0)){
+            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
             linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMin);
+            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);
             linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        } else if (((positionLinearSlideMotor > positionLinearSlideMotorMax) && !(ry2 >= 0))) {
-            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMax);
+        } else if (((positionLinearSlideMotorLeft > positionLinearSlideMotorMaxLeft) && !(ry2 >= 0))) {
+            linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMaxLeft);
             linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMax);
+            linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMaxRight);
             linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         } else {
             linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             linearSlideMotorLeft.setPower(ry2);
             linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             linearSlideMotorRight.setPower(ry2);
-            positionLinearSlideMotor = linearSlideMotorLeft.getCurrentPosition();
+            positionLinearSlideMotorLeft = linearSlideMotorLeft.getCurrentPosition();
+            positionLinearSlideMotorRight = linearSlideMotorRight.getCurrentPosition();
         }
 
       
