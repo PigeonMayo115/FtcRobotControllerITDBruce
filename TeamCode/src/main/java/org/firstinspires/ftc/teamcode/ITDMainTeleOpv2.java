@@ -168,26 +168,7 @@ public class ITDMainTeleOpv2 extends OpMode
         // this is also an if statement. basically, it just does the 90 degree movements that
         // owen wanted when the left stick is not being used
         
-        if (!( y == 0 ) || !( x == 0 ) || !( rx == 0)) {
-            myDrivetrain.stickDrive(x, y, rx, speedModifier);
-        }
-        else if (dpadUp1 || dpadDown1 || dpadLeft1 || dpadRight1){
-          if (dpadUp1) {
-            myDrivetrain.driveForward(speedModifier);
-          }
-          else if (dpadDown1){
-            myDrivetrain.driveReverse(speedModifier);
-          }
-          
-          if (dpadRight1) {
-            myDrivetrain.driveRight(speedModifier);
-          }
-          else if (dpadLeft1) {
-            myDrivetrain.driveLeft(speedModifier);
-          }
-        }else{
-            myDrivetrain.setMotPow(0,0,0,0, 0);
-        }
+       myDrivetrain.fullDrive(x,y,rx,speedModifier, dpadUp1,dpadDown1,dpadLeft1,dpadRight1);
 
         myDrivetrain.setMotPow(
                 frontLeftPower,
