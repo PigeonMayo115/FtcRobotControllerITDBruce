@@ -10,21 +10,29 @@ public class Drivetrain {
     DcMotor frMot = null;
     DcMotor brMot = null;
 
-    public Drivetrain(HardwareMap hwMap) {
+    public Drivetrain(HardwareMap hwMap, boolean schoolOrHome) {
 
         flMot = hwMap.dcMotor.get("frontLeftMotor");
         blMot = hwMap.dcMotor.get("backLeftMotor");
         frMot = hwMap.dcMotor.get("frontRightMotor");
-        brMot = hwMap.dcMotor.get("backRight");
+        brMot = hwMap.dcMotor.get("backRightMotor");
 
         frMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         blMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frMot.setDirection(DcMotorSimple.Direction.REVERSE);
-        brMot.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        if (schoolOrHome) { // true = school, false = home
+            flMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            blMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            frMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else {
+            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            frMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
         frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
@@ -51,12 +59,19 @@ public class Drivetrain {
 
     public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult) {
         double denominator = Math.max(Math.abs(yCmd) + Math.abs(xCmd) + Math.abs(rxCmd), 1);
+        xCmd = xCmd*-1;
+
         setMotPow(
                 (yCmd + xCmd - rxCmd) / denominator,
-                (yCmd - xCmd + rxCmd) / denominator,
                 (yCmd - xCmd - rxCmd) / denominator,
+                (yCmd - xCmd + rxCmd) / denominator,
                 (yCmd + xCmd + rxCmd) / denominator,
                 spdMult
+                /*(yCmd + xCmd + rxCmd) / denominator,
+                (yCmd - xCmd - rxCmd) / denominator,
+                (yCmd - xCmd + rxCmd) / denominator,
+                (yCmd + xCmd - rxCmd) / denominator,
+                spdMult */
 
         );
     }

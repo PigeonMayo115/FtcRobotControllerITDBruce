@@ -70,7 +70,7 @@ Last updated on 10/24/2024
 
  */
 
-@TeleOp(name="ITDMainTeleOp", group="Iterative OpMode")
+@TeleOp
 public class ITDMainTeleOp extends OpMode
 {
     // Declare OpMode members.

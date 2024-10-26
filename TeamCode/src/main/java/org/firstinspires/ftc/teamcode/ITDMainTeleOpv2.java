@@ -71,7 +71,7 @@ Last updated on 10/24/2024
 
  */
 
-@TeleOp(name="ITDMainTeleOp", group="Iterative OpMode")
+@TeleOp
 public class ITDMainTeleOpv2 extends OpMode
 {
     // Declare OpMode members.
@@ -101,8 +101,8 @@ public class ITDMainTeleOpv2 extends OpMode
         armMotor = hardwareMap.dcMotor.get("armMotor");
 
         myLift = new Lift(hardwareMap);     // New instance of the "lift" class
-
-        myDrivetrain = new Drivetrain(hardwareMap); // New instance of the "Drivetrain" class
+                                            // true = school, false = home
+        myDrivetrain = new Drivetrain(hardwareMap,true); // New instance of the "Drivetrain" class
 
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
