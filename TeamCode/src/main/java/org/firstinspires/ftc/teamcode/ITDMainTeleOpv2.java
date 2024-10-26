@@ -84,9 +84,9 @@ public class ITDMainTeleOpv2 extends OpMode
     double backLeftPower = 0;
     double frontRightPower = 0;
     double backRightPower = 0;
-    Lift myLift;
+    private Lift myLift;
 
-    Drivetrain myDrivetrain;
+    private Drivetrain myDrivetrain;
 
     /*
      * Code to run ONCE when the driver hits INIT

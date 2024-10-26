@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.custom;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 public class Drivetrain {
     DcMotor flMot = null;
@@ -37,6 +39,8 @@ public class Drivetrain {
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+
+
 
 
     }
@@ -75,12 +79,7 @@ public class Drivetrain {
 
         );
     }
-
-    /* double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-    frontLeftPower = (y + x - rx) / denominator;
-    backLeftPower = (y - x + rx) / denominator;
-    frontRightPower = (y - x - rx) / denominator;
-    backRightPower = (y + x + rx) / denominator; */
+    
 
     public void setMotPow(double flMotPow, double blMotPow, double frMotPow, double brMotPow, double spdMult) {
         flMot.setPower(flMotPow * spdMult);
@@ -106,7 +105,59 @@ public class Drivetrain {
         } else {
             this.setMotPow(0, 0, 0, 0, 0);
         }
-
-
     }
+
+    public void moveForwardInches(int distance){
+        int distanceTicks = (int) (distance*29.81);
+        flMot.setTargetPosition(distanceTicks);
+        blMot.setTargetPosition(distanceTicks);
+        frMot.setTargetPosition(distanceTicks);
+        brMot.setTargetPosition(distanceTicks);
+        this.setMotRTP();
+    }
+    public void moveReverseInches(int distance){
+        int distanceTicks = (int) (distance*29.81);
+        flMot.setTargetPosition(-distanceTicks);
+        blMot.setTargetPosition(-distanceTicks);
+        frMot.setTargetPosition(-distanceTicks);
+        brMot.setTargetPosition(-distanceTicks);
+        this.setMotRTP();
+    }
+    public void moveLeftInches(int distance){
+        int distanceTicks = (int) (distance*29.81);
+        flMot.setTargetPosition(-distanceTicks);
+        blMot.setTargetPosition(distanceTicks);
+        frMot.setTargetPosition(distanceTicks);
+        brMot.setTargetPosition(-distanceTicks);
+        this.setMotRTP();
+    }
+    public void moveRightInches(int distance){
+        int distanceTicks = (int) (distance*29.81);
+        flMot.setTargetPosition(distanceTicks);
+        blMot.setTargetPosition(-distanceTicks);
+        frMot.setTargetPosition(-distanceTicks);
+        brMot.setTargetPosition(distanceTicks);
+        this.setMotRTP();
+    }
+    
+    public void toHeading(){
+        this.setMotRUE();
+
+        
+    }
+    
+    public void setMotRTP(){
+        flMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        blMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        brMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setMotRUE(){
+        flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+    }
+
 }
