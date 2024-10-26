@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -71,6 +72,7 @@ Last updated on 10/24/2024
  */
 
 @TeleOp
+@Disabled
 public class ITDMainTeleOp extends OpMode
 {
     // Declare OpMode members.
@@ -250,6 +252,11 @@ public class ITDMainTeleOp extends OpMode
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("LeftTrigger", gamepad1.left_trigger);
+
+        telemetry.addData("Positions", "left (%d), right (%d)",
+                myLift.getLeftPos(), myLift.getRightPos());
+        telemetry.addData("Powers", "left (%.2f), right (%.2f)",
+                myLift.getLeftPower(), myLift.getRightPower());
     }
 
     /*

@@ -102,7 +102,7 @@ public class ITDMainTeleOpv2 extends OpMode
 
         myLift = new Lift(hardwareMap);     // New instance of the "lift" class
                                             // true = school, false = home
-        myDrivetrain = new Drivetrain(hardwareMap,true); // New instance of the "Drivetrain" class
+        myDrivetrain = new Drivetrain(hardwareMap,0); // New instance of the "Drivetrain" class
 
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
@@ -168,14 +168,7 @@ public class ITDMainTeleOpv2 extends OpMode
         // this is also an if statement. basically, it just does the 90 degree movements that
         // owen wanted when the left stick is not being used
         
-       myDrivetrain.fullDrive(x,y,rx,speedModifier, dpadUp1,dpadDown1,dpadLeft1,dpadRight1);
-
-        myDrivetrain.setMotPow(
-                frontLeftPower,
-                backLeftPower,
-                frontRightPower,
-                backRightPower,speedModifier
-        );
+       myDrivetrain.fullDrive(-x,y,-rx,speedModifier, dpadUp1,dpadDown1,dpadLeft1,dpadRight1);
 
 
         //input for continuous rotation servo with rubber wheel

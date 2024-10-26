@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.custom.Drivetrain;
 
 /*
@@ -61,14 +62,8 @@ public class AutonomousEncoderTest extends OpMode
    private Drivetrain myDrivetrain;
     @Override
     public void init() {
-        myDrivetrain = new Drivetrain(hardwareMap, true);
+        myDrivetrain = new Drivetrain(hardwareMap, 2);
 
-     /*RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-     RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
-
-     RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-
-     imu.initialize(new IMU.Parameters(orientationOnRobot));*/
      
 
     }
@@ -78,14 +73,16 @@ public class AutonomousEncoderTest extends OpMode
      */
     @Override
     public void init_loop() {
+     telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+
     }
 
-    /*
+
+ /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
     public void start() {
-        myDrivetrain.moveForwardInches(24);
 
     }
 
@@ -94,6 +91,12 @@ public class AutonomousEncoderTest extends OpMode
      */
     @Override
     public void loop() {
+     telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+     //myDrivetrain.turnToHeading(-90);
+
+     myDrivetrain.moveForwardInches(18);
+
+     //myDrivetrain.setTargetHeading(-90);
 
     }
 

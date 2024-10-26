@@ -29,13 +29,17 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.custom.Drivetrain;
 
 /*
@@ -52,12 +56,16 @@ import org.firstinspires.ftc.teamcode.custom.Drivetrain;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp
-public class DrivetrainTestOpMode extends OpMode {
-  Drivetrain myDriveTrain;
+@Autonomous
+public class ITDMainAutonomousRight extends OpMode
+{
+    private Drivetrain myDrivetrain;
+    int step = 0;
+    boolean stepDone = false;
     @Override
     public void init() {
-     myDriveTrain = new Drivetrain(hardwareMap, 0);
+        myDrivetrain = new Drivetrain(hardwareMap, 2);
+
 
 
     }
@@ -67,14 +75,18 @@ public class DrivetrainTestOpMode extends OpMode {
      */
     @Override
     public void init_loop() {
+        telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+
     }
+
 
     /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
     public void start() {
-
+        //myDrivetrain.moveForwardInches(18);
+        //myDrivetrain.setTargetHeading(-90);
     }
 
     /*
@@ -82,18 +94,42 @@ public class DrivetrainTestOpMode extends OpMode {
      */
     @Override
     public void loop() {
-        double x = gamepad1.left_stick_x;
-        double y = gamepad1.left_stick_y;
-        double rx = gamepad1.right_stick_x;
-        double trigger = gamepad1.left_trigger;
-        boolean up = gamepad1.dpad_up;
-        boolean down = gamepad1.dpad_up;
-        boolean left = gamepad1.dpad_left;
-        boolean right = gamepad1.dpad_right;
 
-        double speedModifier = 1-(trigger*0.8);
+        telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        telemetry.addData("step: ",step);
+        telemetry.addData("fl motor target", myDrivetrain.flMot.getTargetPosition());
+        telemetry.addData("bl motor target", myDrivetrain.blMot.getTargetPosition());
+        telemetry.addData("fr motor target", myDrivetrain.frMot.getTargetPosition());
+        telemetry.addData("br motor target", myDrivetrain.brMot.getTargetPosition());
 
-       myDriveTrain.fullDrive(-x,-y,-rx,speedModifier,up,down,left,right);
+        switch(step){
+            case 0:
+                myDrivetrain.setMotSRE();       // clear the encoders
+                step = 10;
+                break;
+            case 10://forwards 6 inches
+                stepDone = myDrivetrain.moveForwardInches(6);
+                if(stepDone){
+                    myDrivetrain.setTargetHeading(-90);
+                    step = 20;
+                }
+                break;
+            case 20: //turn right 90 degrees
+                stepDone = myDrivetrain.turnToHeading(-90);
+                if (stepDone){
+                    myDrivetrain.setMotSRE();       // clear the encoders
+                    step = 30;
+                }
+                break;
+            case 30: //forward 39 inches
+                stepDone = myDrivetrain.moveForwardInches(39);
+                if(stepDone){
+                    step = 40;
+                }
+
+
+        }
+
     }
 
     /*

@@ -1,18 +1,30 @@
 package org.firstinspires.ftc.teamcode.custom;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-public class Drivetrain {
-    DcMotor flMot = null;
-    DcMotor blMot = null;
-    DcMotor frMot = null;
-    DcMotor brMot = null;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-    public Drivetrain(HardwareMap hwMap, boolean schoolOrHome) {
+public class Drivetrain {
+   public DcMotor flMot = null;
+   public DcMotor blMot = null;
+   public DcMotor frMot = null;
+   public DcMotor brMot = null;
+   public IMU imu;
+   public double targetHeading;
+   public int targetDistance;
+    int encoderResolution = 440; //384 is for the gobilda motors with rpm 435
+                                 // for the rev motors, the resolution is 288 for a 40:1 gearbox
+                                 // ours are configured for 15:1, so the resolution on eliot is 104
+    double ticksPerInch = encoderResolution/(4.1*Math.PI);
+
+
+    public Drivetrain(HardwareMap hwMap, int robotConfig) {
 
         flMot = hwMap.dcMotor.get("frontLeftMotor");
         blMot = hwMap.dcMotor.get("backLeftMotor");
@@ -24,25 +36,35 @@ public class Drivetrain {
         flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (schoolOrHome) { // true = school, false = home
-            flMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            blMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            frMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
-        } else {
+        if (robotConfig == 0) { // 0 = bogg, 1 = home, 2 = eliot
             flMot.setDirection(DcMotorSimple.Direction.FORWARD);
             blMot.setDirection(DcMotorSimple.Direction.FORWARD);
             frMot.setDirection(DcMotorSimple.Direction.REVERSE);
             brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        } else if (robotConfig == 1) {
+            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            blMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
+        else if (robotConfig == 2) {
+            flMot.setDirection(DcMotorSimple.Direction.REVERSE);
+            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+            brMot.setDirection(DcMotorSimple.Direction.FORWARD);
         }
         frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
 
+        imu = hwMap.get(IMU.class, "imu");
 
-
-
+        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT);
+                //this is correct for eliot TODO: make a case for bogg, home robot does not have a built in imu
+        imu.initialize(new IMU.Parameters(revOrientation));
     }
 
     public void driveLeft(double spdMult) {
@@ -61,23 +83,86 @@ public class Drivetrain {
         setMotPow(-1, 1, -1, -1, spdMult);
     }
 
-    public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult) {
+    public double getHeading(AngleUnit angleUnit){
+        return imu.getRobotYawPitchRollAngles().getYaw(angleUnit);
+    }
+
+    public void setTargetHeading(double degrees){
+        double startHeading = getHeading(AngleUnit.DEGREES);
+        double overShootAdjuster = 11.0;        // seems to overshoot by 11 degrees
+        targetHeading = startHeading + degrees; //if result is >180 degrees, fix it!
+
+        if (degrees < 0) { targetHeading = (targetHeading + overShootAdjuster);}
+        if (degrees > 0){ targetHeading = (targetHeading - overShootAdjuster);}
+
+        if(targetHeading>180){
+            targetHeading = targetHeading-360;
+        } else if (targetHeading<-180){
+            targetHeading = targetHeading+ 360;
+        }
+    }
+
+    //turn the robot to the LEFT if positive, right if negative
+    //returns true if move is complete
+    public boolean turnToHeading(double degrees){
+
+        setMotRUE();        // Run Using Encoder
+
+        //now we are going to do the turn
+        if(degrees>0){
+            //we are turning left
+            if(getHeading(AngleUnit.DEGREES)<=targetHeading){
+                setMotPow(-0.3,-0.3,0.3,0.3,1);
+                return false;
+            } else {
+                setMotPow(0,0,0,0,0);
+                return true;
+            }
+        }
+        if (degrees<0){
+            //we are turning right
+            if(getHeading(AngleUnit.DEGREES)>=targetHeading){
+                setMotPow(0.3,0.3,-0.3,-0.3,1);
+                return false;
+            } else {
+                setMotPow(0,0,0,0,0);
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult, int robotConfig)
+    // 0 = bogg, 1 = home robot, 2 = eliot
+    {
         double denominator = Math.max(Math.abs(yCmd) + Math.abs(xCmd) + Math.abs(rxCmd), 1);
         xCmd = xCmd*-1;
-
-        setMotPow(
-                (yCmd + xCmd - rxCmd) / denominator,
+        
+        if (robotConfig == 0) {
+            setMotPow(
+                    (yCmd + xCmd - rxCmd) / denominator,
+                    (yCmd - xCmd - rxCmd) / denominator,
+                    (yCmd - xCmd + rxCmd) / denominator,
+                    (yCmd + xCmd + rxCmd) / denominator,
+                    spdMult);
+        } else if (robotConfig == 1){
+                setMotPow(
+                        (yCmd + xCmd + rxCmd) / denominator,
                 (yCmd - xCmd - rxCmd) / denominator,
                 (yCmd - xCmd + rxCmd) / denominator,
-                (yCmd + xCmd + rxCmd) / denominator,
-                spdMult
-                /*(yCmd + xCmd + rxCmd) / denominator,
-                (yCmd - xCmd - rxCmd) / denominator,
-                (yCmd - xCmd + rxCmd) / denominator,
                 (yCmd + xCmd - rxCmd) / denominator,
-                spdMult */
+                spdMult);
+        } else if (robotConfig == 2){
+            setMotPow(
+                    (yCmd + xCmd + rxCmd) / denominator,
+                    (yCmd - xCmd - rxCmd) / denominator,
+                    (yCmd - xCmd + rxCmd) / denominator,
+                    (yCmd + xCmd - rxCmd) / denominator,
+                    spdMult);
+        }
 
-        );
+        
     }
     
 
@@ -91,7 +176,7 @@ public class Drivetrain {
 
     public void fullDrive(double x, double y, double rx, double spdMult, boolean up, boolean down, boolean left, boolean right) {
         if (!(y == 0) || !(x == 0) || !(rx == 0)) {
-            this.stickDrive(x, y, rx, spdMult);
+            this.stickDrive(x, y, rx, spdMult, 0);
         } else if (up || down || left || right) {
             if (up) {
                 this.driveForward(spdMult);
@@ -107,16 +192,34 @@ public class Drivetrain {
         }
     }
 
-    public void moveForwardInches(int distance){
-        int distanceTicks = (int) (distance*29.81);
-        flMot.setTargetPosition(distanceTicks);
-        blMot.setTargetPosition(distanceTicks);
-        frMot.setTargetPosition(distanceTicks);
-        brMot.setTargetPosition(distanceTicks);
-        this.setMotRTP();
+    public boolean moveForwardInches(int distance){
+        int distanceTicks;
+        if(targetDistance == 0){        // Move not started yet
+            targetDistance = distance;
+            return false;
+        } else {
+            distanceTicks = (int)(distance*ticksPerInch);
+            flMot.setTargetPosition(distanceTicks);
+            blMot.setTargetPosition(distanceTicks);
+            frMot.setTargetPosition(distanceTicks);
+            brMot.setTargetPosition(distanceTicks);
+            this.setMotRTP();
+            if (flMot.getCurrentPosition() >= distanceTicks){       // all done
+                setMotPow(0,0,0,0,0);
+                targetDistance = 0;
+                return true;
+            } else {                                                // run it forward
+                this.setMotPow(0.3,0.3,0.3,0.3, 1);
+                return false;
+            }
+        }
+
+
+
+
     }
     public void moveReverseInches(int distance){
-        int distanceTicks = (int) (distance*29.81);
+        int distanceTicks = (int) (distance*ticksPerInch);
         flMot.setTargetPosition(-distanceTicks);
         blMot.setTargetPosition(-distanceTicks);
         frMot.setTargetPosition(-distanceTicks);
@@ -124,7 +227,7 @@ public class Drivetrain {
         this.setMotRTP();
     }
     public void moveLeftInches(int distance){
-        int distanceTicks = (int) (distance*29.81);
+        int distanceTicks = (int) (distance*ticksPerInch);
         flMot.setTargetPosition(-distanceTicks);
         blMot.setTargetPosition(distanceTicks);
         frMot.setTargetPosition(distanceTicks);
@@ -132,19 +235,14 @@ public class Drivetrain {
         this.setMotRTP();
     }
     public void moveRightInches(int distance){
-        int distanceTicks = (int) (distance*29.81);
+        int distanceTicks = (int) (distance*ticksPerInch);
         flMot.setTargetPosition(distanceTicks);
         blMot.setTargetPosition(-distanceTicks);
         frMot.setTargetPosition(-distanceTicks);
         brMot.setTargetPosition(distanceTicks);
         this.setMotRTP();
     }
-    
-    public void toHeading(){
-        this.setMotRUE();
 
-        
-    }
     
     public void setMotRTP(){
         flMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -158,6 +256,28 @@ public class Drivetrain {
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+    }
+
+    public void setMotSRE(){
+        flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        blMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void singleMot (int whichMotor){
+        if (whichMotor == 1 ){
+            flMot.setPower(1);
+        }
+        if (whichMotor == 2 ){
+            blMot.setPower(1);
+        }
+        if (whichMotor == 3 ){
+            frMot.setPower(1);
+        }
+        if (whichMotor == 4 ){
+            brMot.setPower(1);
+        }
     }
 
 }

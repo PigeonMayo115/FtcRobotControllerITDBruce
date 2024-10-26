@@ -30,6 +30,9 @@ public class Lift {
         linearSlideMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linearSlideMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        linearSlideMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
         //linearSlideMotorLeft.setTargetPosition(positionLinearSlideMotorMinLeft);
         //linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //linearSlideMotorRight.setTargetPosition(positionLinearSlideMotorMinRight);

@@ -53,11 +53,11 @@ import org.firstinspires.ftc.teamcode.custom.Drivetrain;
  */
 
 @TeleOp
-public class DrivetrainTestOpMode extends OpMode {
-  Drivetrain myDriveTrain;
+public class MotorIOTest extends OpMode {
+    Drivetrain myDriveTrain;
     @Override
     public void init() {
-     myDriveTrain = new Drivetrain(hardwareMap, 0);
+        myDriveTrain = new Drivetrain(hardwareMap, 2);
 
 
     }
@@ -67,6 +67,7 @@ public class DrivetrainTestOpMode extends OpMode {
      */
     @Override
     public void init_loop() {
+
     }
 
     /*
@@ -82,18 +83,39 @@ public class DrivetrainTestOpMode extends OpMode {
      */
     @Override
     public void loop() {
-        double x = gamepad1.left_stick_x;
-        double y = gamepad1.left_stick_y;
-        double rx = gamepad1.right_stick_x;
-        double trigger = gamepad1.left_trigger;
-        boolean up = gamepad1.dpad_up;
-        boolean down = gamepad1.dpad_up;
-        boolean left = gamepad1.dpad_left;
-        boolean right = gamepad1.dpad_right;
+        if (gamepad1.a){
+            myDriveTrain.singleMot(1);
+            telemetry.addData("motor: ","front left");
+        }
+        else if (gamepad1.b){
+            myDriveTrain.singleMot(2);
+            telemetry.addData("motor: ","back left");
+        }
+        else if (gamepad1.x){
+            myDriveTrain.singleMot(3);
+            telemetry.addData("motor: ","front right");
+        }
+        else if (gamepad1.y){
+            myDriveTrain.singleMot(4);
+            telemetry.addData("motor: ", "back right");
 
-        double speedModifier = 1-(trigger*0.8);
+        }else {
+            myDriveTrain.setMotPow(0,0,0,0,0);
+            telemetry.addData("motor: ", "none");
+        }
 
-       myDriveTrain.fullDrive(-x,-y,-rx,speedModifier,up,down,left,right);
+        telemetry.addData("front left position",myDriveTrain.flMot.getCurrentPosition());
+        telemetry.addData("back left position",myDriveTrain.blMot.getCurrentPosition());
+        telemetry.addData("front right position",myDriveTrain.frMot.getCurrentPosition());
+        telemetry.addData("back right position",myDriveTrain.brMot.getCurrentPosition());
+
+        if (gamepad1.dpad_down){
+            myDriveTrain.setMotSRE();
+        }else{
+            myDriveTrain.setMotRUE();
+        }
+
+
     }
 
     /*
