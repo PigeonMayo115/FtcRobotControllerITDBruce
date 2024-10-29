@@ -63,13 +63,18 @@ public class Lift {
         }
     }
 
-    private void holdPosition(int left, int right){
+    public boolean holdPosition(int left, int right){
         linearSlideMotorLeft.setTargetPosition(left);
         linearSlideMotorRight.setTargetPosition(right);
         linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         linearSlideMotorLeft.setPower(1.0);
         linearSlideMotorRight.setPower(1.0);
+        if (linearSlideMotorLeft.getCurrentPosition() == left && linearSlideMotorRight.getCurrentPosition() == right){
+            return true;
+        }else {
+            return false;
+        }
     }
     public void moveSimple(double speedCmd){
         linearSlideMotorLeft.setPower(speedCmd);
