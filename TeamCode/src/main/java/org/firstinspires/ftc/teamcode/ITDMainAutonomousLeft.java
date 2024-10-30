@@ -31,6 +31,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.custom.ArmMotor;
@@ -57,15 +59,19 @@ public class ITDMainAutonomousLeft extends OpMode
 {
     private Drivetrain myDrivetrain;
     private CrServo myCrServo;
+    private Servo wristServo;
     private ArmMotor myArmMotor;
     private Lift myLift;
     int step = 0;
     boolean stepDone = false;
+    ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void init() {
-        myDrivetrain = new Drivetrain(hardwareMap, 2);
+        myDrivetrain = new Drivetrain(hardwareMap, 0);
         myCrServo = new CrServo(hardwareMap);
         myLift = new Lift(hardwareMap);
+        wristServo = hardwareMap.servo.get("wristServo");
 
 
 
@@ -103,6 +109,7 @@ public class ITDMainAutonomousLeft extends OpMode
         telemetry.addData("fr motor target", myDrivetrain.frMot.getTargetPosition());
         telemetry.addData("br motor target", myDrivetrain.brMot.getTargetPosition());
 
+
         /* move forward, turn left, move forward, turn towards the basket, move forward,
         * extend arm motor, extend linear slide, spit out block, turn, drive to chamber,
         * turn, keep going, turn, move towards rung, move arm to touch low rung */
@@ -113,7 +120,7 @@ public class ITDMainAutonomousLeft extends OpMode
                 step = 10;
                 break;
             case 10://forwards 6 inches
-                stepDone = myDrivetrain.moveForwardInches(6);
+                stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
                     myDrivetrain.setTargetHeading(90);
                     step = 20;
@@ -127,7 +134,7 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 30: //forward 39 inches
-                stepDone = myDrivetrain.moveForwardInches(39);
+                stepDone = myDrivetrain.moveForwardInches(24);
                 if(stepDone){
                     myDrivetrain.setTargetHeading(135);
                     step = 40;
@@ -146,22 +153,20 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 60:
-                stepDone = myArmMotor.armGoToAngle(135);
+                stepDone = myArmMotor.armGoToAngle(3220);
                 if (stepDone){
                     step = 70;
                 }
                 break;
             case 70:
-                stepDone = myLift.holdPosition(800,800);
+                stepDone = myLift.holdPosition(1610,1610);
                 if (stepDone){
                     step = 80;
                 }
                 break;
             case 80:
-                stepDone = myCrServo.spit();
+                stepDone = myCrServo.spit(1,runtime.time());
                 if (stepDone){
-                    // I need it to wait like 1 second before this code is excecuted, Dont know how to do that
-                    myCrServo.stop();
                     myDrivetrain.setTargetHeading(-45);
                     step = 90;
                 }
@@ -174,8 +179,9 @@ public class ITDMainAutonomousLeft extends OpMode
             case 100:
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if (stepDone){
-                    step = 110;
                     myDrivetrain.setTargetHeading(0);
+                    step = 110;
+
                 }
                 break;
             case 110:
@@ -185,15 +191,27 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 120:
-                stepDone = myDrivetrain.moveForwardInches( 6);
+                stepDone = myDrivetrain.moveForwardInches( 24);
                 if (stepDone){
+                    myDrivetrain.setTargetHeading(-90);
                     step = 130;
                 }
-                break;
             case 130:
-                stepDone = myArmMotor.armGoToAngle(0);
+                stepDone = myDrivetrain.turnToHeading(-90);
+                if (stepDone){
+                    step = 135;
+                }
+                break;
+            case 135:
+                stepDone = myLift.holdPosition(0,0);
                 if (stepDone){
                     step = 140;
+                }
+            case 140:
+                stepDone = myArmMotor.armGoToAngle(4000);
+                if (stepDone) {
+                    step = 150;
+                    myDrivetrain.setTargetHeading(-90);
                 }
 
         }

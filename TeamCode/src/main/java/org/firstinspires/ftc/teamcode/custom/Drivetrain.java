@@ -18,9 +18,9 @@ public class Drivetrain {
    public IMU imu;
    public double targetHeading;
    public int targetDistance;
-    int encoderResolution = 440; //384 is for the gobilda motors with rpm 435
-                                 // for the rev motors, the resolution is 288 for a 40:1 gearbox
-                                 // ours are configured for 15:1, so the resolution on eliot is 104
+    int encoderResolution = 440; /* for the rev motors, the resolution is 440
+                                 for bogg (yellowJacket) the resolution is 550*/
+
     double ticksPerInch = encoderResolution/(4.1*Math.PI);
 
 
@@ -62,7 +62,7 @@ public class Drivetrain {
 
         RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT);
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
                 //this is correct for eliot TODO: make a case for bogg, home robot does not have a built in imu
         imu.initialize(new IMU.Parameters(revOrientation));
     }

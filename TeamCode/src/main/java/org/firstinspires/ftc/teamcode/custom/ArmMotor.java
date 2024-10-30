@@ -31,9 +31,8 @@ public class ArmMotor {
         armMot.setTargetPosition(pos);
         armMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-    public boolean armGoToAngle(int targetDegrees) {
+    public boolean armGoToAngle(int targetTicks) {
         armMot.setPower(1);
-        int targetTicks = (int) (targetDegrees * 0.1);
         armMot.setTargetPosition(targetTicks);
         if (targetTicks == armMot.getCurrentPosition()) {
             return true;

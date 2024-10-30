@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.custom.ArmMotor;
 import org.firstinspires.ftc.teamcode.custom.Drivetrain;
 import org.firstinspires.ftc.teamcode.custom.Lift;
 
@@ -88,6 +89,7 @@ public class ITDMainTeleOpv2 extends OpMode
 
     private Drivetrain myDrivetrain;
 
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -104,6 +106,8 @@ public class ITDMainTeleOpv2 extends OpMode
                                             // true = school, false = home
         myDrivetrain = new Drivetrain(hardwareMap,0); // New instance of the "Drivetrain" class
 
+
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         positionArmMotor = armMotor.getCurrentPosition();
         armMotor.setTargetPosition(positionArmMotor);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -200,6 +204,9 @@ public class ITDMainTeleOpv2 extends OpMode
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("LeftTrigger", gamepad1.left_trigger);
+        telemetry.addData("leftLiftMotor ", myLift.linearSlideMotorLeft.getCurrentPosition());
+        telemetry.addData("rightLiftMotor ", myLift.linearSlideMotorRight.getCurrentPosition());
+        telemetry.addData("armMotor",armMotor.getCurrentPosition());
     }
 
     /*

@@ -40,6 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.custom.CrServo;
 import org.firstinspires.ftc.teamcode.custom.Drivetrain;
 
 /*
@@ -57,14 +58,12 @@ import org.firstinspires.ftc.teamcode.custom.Drivetrain;
  */
 
 @Autonomous
-public class ITDMainAutonomousRight extends OpMode
+public class TimeTest extends OpMode
 {
-    private Drivetrain myDrivetrain;
-    int step = 0;
-    boolean stepDone = false;
+
     @Override
     public void init() {
-        myDrivetrain = new Drivetrain(hardwareMap, 0);
+        ElapsedTime runtime = new ElapsedTime();
 
 
 
@@ -75,7 +74,6 @@ public class ITDMainAutonomousRight extends OpMode
      */
     @Override
     public void init_loop() {
-        telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
     }
 
@@ -85,8 +83,7 @@ public class ITDMainAutonomousRight extends OpMode
      */
     @Override
     public void start() {
-        //myDrivetrain.moveForwardInches(18);
-        //myDrivetrain.setTargetHeading(-90);
+
     }
 
     /*
@@ -95,42 +92,10 @@ public class ITDMainAutonomousRight extends OpMode
     @Override
     public void loop() {
 
-        telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-        telemetry.addData("step: ",step);
-        telemetry.addData("fl motor target", myDrivetrain.flMot.getTargetPosition());
-        telemetry.addData("bl motor target", myDrivetrain.blMot.getTargetPosition());
-        telemetry.addData("fr motor target", myDrivetrain.frMot.getTargetPosition());
-        telemetry.addData("br motor target", myDrivetrain.brMot.getTargetPosition());
 
-        switch(step){
-            case 0:
-                myDrivetrain.setMotSRE();       // clear the encoders
-                step = 10;
-                break;
-            case 10://forwards 6 inches
-                stepDone = myDrivetrain.moveForwardInches(6);
-                if(stepDone){
-                    myDrivetrain.setTargetHeading(-90);
-                    step = 20;
-                }
-                break;
-            case 20: //turn right 90 degrees
-                stepDone = myDrivetrain.turnToHeading(-90);
-                if (stepDone){
-                    myDrivetrain.setMotSRE();       // clear the encoders
-                    step = 30;
-                }
-                break;
-            case 30: //forward 39 inches
-                stepDone = myDrivetrain.moveForwardInches(39);
-                if(stepDone){
-                    step = 40;
-                }
 
 
         }
-
-    }
 
     /*
      * Code to run ONCE after the driver hits STOP
@@ -140,3 +105,4 @@ public class ITDMainAutonomousRight extends OpMode
     }
 
 }
+

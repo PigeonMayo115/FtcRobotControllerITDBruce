@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Lift {
 
-    private DcMotor linearSlideMotorLeft = null;
-    private DcMotor linearSlideMotorRight = null;
+    public DcMotor linearSlideMotorLeft = null;
+    public DcMotor linearSlideMotorRight = null;
     private int positionLinearSlideMotorLeft = 0;
     private int positionLinearSlideMotorMinLeft = 0;
     private int positionLinearSlideMotorMaxLeft = 0;
@@ -24,8 +24,8 @@ public class Lift {
         linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         positionLinearSlideMotorMinLeft = linearSlideMotorLeft.getCurrentPosition();
         positionLinearSlideMotorMinRight = linearSlideMotorRight.getCurrentPosition();
-        positionLinearSlideMotorMaxLeft = linearSlideMotorLeft.getCurrentPosition() + 2304;
-        positionLinearSlideMotorMaxRight = linearSlideMotorRight.getCurrentPosition() + 2304;
+        positionLinearSlideMotorMaxLeft = linearSlideMotorLeft.getCurrentPosition() + 2100;
+        positionLinearSlideMotorMaxRight = linearSlideMotorRight.getCurrentPosition() + 2100;
 
         linearSlideMotorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linearSlideMotorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
