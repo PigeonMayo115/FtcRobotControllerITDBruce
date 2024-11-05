@@ -111,7 +111,7 @@ public class Drivetrain {
         //now we are going to do the turn
         if(degrees>0){
             //we are turning left
-            if(getHeading(AngleUnit.DEGREES)<=targetHeading){
+            if(getHeading(AngleUnit.DEGREES)<targetHeading){
                 setMotPow(-0.3,-0.3,0.3,0.3,1);
                 return false;
             } else {
@@ -121,7 +121,7 @@ public class Drivetrain {
         }
         if (degrees<0){
             //we are turning right
-            if(getHeading(AngleUnit.DEGREES)>=targetHeading){
+            if(getHeading(AngleUnit.DEGREES)>targetHeading){
                 setMotPow(0.3,0.3,-0.3,-0.3,1);
                 return false;
             } else {
@@ -132,6 +132,17 @@ public class Drivetrain {
             return true;
         }
     }
+    public boolean dumbTurn(double degrees){
+        setMotRUE();
+        if (getHeading(AngleUnit.DEGREES)==degrees){
+            setMotPow(0,0,0,0,0);
+            return true;
+        }else{
+            setMotPow(0.1,0.1,-0.1,-0.1,1 );
+            return false;
+        }
+    }
+
 
     public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult, int robotConfig)
     // 0 = bogg, 1 = home robot, 2 = eliot

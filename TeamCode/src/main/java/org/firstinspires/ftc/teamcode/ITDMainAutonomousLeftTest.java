@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -57,7 +56,7 @@ import org.firstinspires.ftc.teamcode.custom.Lift;
  */
 
 @Autonomous
-public class ITDMainAutonomousLeft extends OpMode
+public class ITDMainAutonomousLeftTest extends OpMode
 {
     private Drivetrain myDrivetrain;
     private CrServo myCrServo;
@@ -142,7 +141,7 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 6:
-                stepDone = myArmMotor.armGoToAngle(-600);
+                stepDone = myArmMotor.armGoToAngle(-400);
                 if (stepDone){
                     step = 7;
                 }
@@ -158,25 +157,32 @@ public class ITDMainAutonomousLeft extends OpMode
             case 10://forwards 6 inches
                 stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
-                    myDrivetrain.setTargetHeading(90);
+                    //myDrivetrain.setTargetHeading(90);
                     step = 20;
                 }
                 break;
             case 20: //turn right 90 degrees
-                stepDone = myDrivetrain.turnToHeading(90);
+                //stepDone = myDrivetrain.turnToHeading(90);
+                //stepDone = myDrivetrain.dumbTurn(90);
+                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 90);
+                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
                 if (stepDone){// clear the encoders
                     step = 30;
+                    myDrivetrain.setMotPow(0,0,0,0,1);
                 }
                 break;
             case 30: //forward 39 inches
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if(stepDone){
-                    myDrivetrain.setTargetHeading(135);
+                    //myDrivetrain.setTargetHeading(135);
                     step = 40;
                 }
                 break;
             case 40:
-                stepDone = myDrivetrain.turnToHeading(135);
+                //stepDone = myDrivetrain.turnToHeading(135);
+                //stepDone = myDrivetrain.dumbTurn(135);
+                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 135);
+                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
                 if (stepDone){
                     step = 50;
                 }
@@ -206,7 +212,9 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 90:
-                stepDone = myDrivetrain.turnToHeading(-45);
+                //stepDone = myDrivetrain.turnToHeading(-45);
+                stepDone = ((myDrivetrain.getHeading(AngleUnit.DEGREES) >= -45)&&(myDrivetrain.getHeading(AngleUnit.DEGREES))<=0);
+                myDrivetrain.setMotPow(0.3,0.3,-0.3,-0.3,1);
                 if (stepDone){
                     step = 100;
                 }
@@ -216,10 +224,12 @@ public class ITDMainAutonomousLeft extends OpMode
                 if (stepDone){
                     myDrivetrain.setTargetHeading(0);
                     step = 110;
+
                 }
                 break;
             case 110:
-                stepDone = myDrivetrain.turnToHeading(0);
+                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 0);
+                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
                 if (stepDone){
                     step = 120;
                 }
@@ -227,12 +237,14 @@ public class ITDMainAutonomousLeft extends OpMode
             case 120:
                 stepDone = myDrivetrain.moveForwardInches( 24);
                 if (stepDone){
-                    myDrivetrain.setTargetHeading(-90);
+                    //myDrivetrain.setTargetHeading(-90);
                     step = 130;
                 }
                 break;
             case 130:
-                stepDone = myDrivetrain.turnToHeading(-90);
+                //stepDone = myDrivetrain.turnToHeading(-90);
+                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) <= -90);
+                myDrivetrain.setMotPow(0.3,0.3,-0.3,-0.3,1);
                 if (stepDone){
                     step = 135;
                 }

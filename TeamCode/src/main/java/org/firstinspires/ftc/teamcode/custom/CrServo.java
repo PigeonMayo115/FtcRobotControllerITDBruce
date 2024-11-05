@@ -33,6 +33,9 @@ public class CrServo {
            return false;
        }
     }
+    public void spitSimple (){
+        crServo.setPower(1);
+    }
 
     public boolean stop(){
         crServo.setPower(0);

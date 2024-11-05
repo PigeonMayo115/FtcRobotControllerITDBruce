@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class ArmMotor {
 
-    DcMotor armMot = null;
+    public DcMotor armMot = null;
     private int armMotPos = 0;
     private int armMotPosMax = 0;
     private int armMotPosMin = 0;
@@ -34,6 +34,7 @@ public class ArmMotor {
     public boolean armGoToAngle(int targetTicks) {
         armMot.setPower(1);
         armMot.setTargetPosition(targetTicks);
+        armMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         if (targetTicks == armMot.getCurrentPosition()) {
             return true;
         } else {
