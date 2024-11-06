@@ -158,7 +158,6 @@ public class ITDMainAutonomousLeft extends OpMode
             case 10://forwards 6 inches
                 stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
-                    myDrivetrain.setTargetHeading(90);
                     step = 20;
                 }
                 break;
@@ -171,7 +170,6 @@ public class ITDMainAutonomousLeft extends OpMode
             case 30: //forward 39 inches
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if(stepDone){
-                    myDrivetrain.setTargetHeading(135);
                     step = 40;
                 }
                 break;
@@ -214,7 +212,6 @@ public class ITDMainAutonomousLeft extends OpMode
             case 100:
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if (stepDone){
-                    myDrivetrain.setTargetHeading(0);
                     step = 110;
                 }
                 break;
@@ -227,7 +224,6 @@ public class ITDMainAutonomousLeft extends OpMode
             case 120:
                 stepDone = myDrivetrain.moveForwardInches( 24);
                 if (stepDone){
-                    myDrivetrain.setTargetHeading(-90);
                     step = 130;
                 }
                 break;
@@ -247,7 +243,6 @@ public class ITDMainAutonomousLeft extends OpMode
                 stepDone = myArmMotor.armGoToAngle(-4000);
                 if (stepDone) {
                     step = 150;
-                    myDrivetrain.setTargetHeading(-90);
                 }
 
         }

@@ -104,45 +104,77 @@ public class Drivetrain {
 
     //turn the robot to the LEFT if positive, right if negative
     //returns true if move is complete
-    public boolean turnToHeading(double degrees){
+    public boolean turnToHeading(double degrees) {
+        boolean done = false;
+        setMotRUE(); // Run Using Encoder
+        if (targetHeading == 0) {
 
-        setMotRUE();        // Run Using Encoder
+            double startHeading = getHeading(AngleUnit.DEGREES);
+            double overShootAdjuster = 11.0;        // seems to overshoot by 11 degrees
+            targetHeading = startHeading + degrees; //if result is >180 degrees, fix it!
 
-        //now we are going to do the turn
-        if(degrees>0){
-            //we are turning left
-            if(getHeading(AngleUnit.DEGREES)<targetHeading){
-                setMotPow(-0.3,-0.3,0.3,0.3,1);
-                return false;
-            } else {
-                setMotPow(0,0,0,0,0);
-                return true;
+            if (degrees < 0) {
+                targetHeading = (targetHeading + overShootAdjuster);
+            }
+            if (degrees > 0) {
+                targetHeading = (targetHeading - overShootAdjuster);
+            }
+
+            if (targetHeading > 180) {
+                targetHeading = targetHeading - 360;
+            } else if (targetHeading < -180) {
+                targetHeading = targetHeading + 360;
+            }
+            done = false;
+        } else if (targetHeading != 0) {
+            //now we are going to do the turn
+            if (degrees > 0) {
+                //we are turning left
+                if (getHeading(AngleUnit.DEGREES) < targetHeading) {
+                    setMotPow(-0.3, -0.3, 0.3, 0.3, 1);
+                    done = false;
+                } else {
+                    done = true;
+                }
+            }
+            if (degrees < 0) {
+                //we are turning right
+                if (getHeading(AngleUnit.DEGREES) > targetHeading) {
+                    setMotPow(0.3, 0.3, -0.3, -0.3, 1);
+                    done = false;
+                } else {
+                    done = true;
+                }
             }
         }
-        if (degrees<0){
-            //we are turning right
-            if(getHeading(AngleUnit.DEGREES)>targetHeading){
-                setMotPow(0.3,0.3,-0.3,-0.3,1);
-                return false;
-            } else {
-                setMotPow(0,0,0,0,0);
-                return true;
-            }
-        } else {
-            return true;
-        }
-    }
-    public boolean dumbTurn(double degrees){
-        setMotRUE();
-        if (getHeading(AngleUnit.DEGREES)==degrees){
+        if (done){
             setMotPow(0,0,0,0,0);
-            return true;
-        }else{
-            setMotPow(0.1,0.1,-0.1,-0.1,1 );
+            targetHeading = 0;
+        }
+        return done;
+    }
+    public boolean moveForwardInches(int distance) {
+        int distanceTicks;
+        if (targetDistance == 0) {        // Move not started yet
+            targetDistance = distance;
             return false;
+        } else {
+            distanceTicks = (int) (distance * ticksPerInch);
+            flMot.setTargetPosition(distanceTicks);
+            blMot.setTargetPosition(distanceTicks);
+            frMot.setTargetPosition(distanceTicks);
+            brMot.setTargetPosition(distanceTicks);
+            this.setMotRTP();
+            if (flMot.getCurrentPosition() >= distanceTicks) {       // all done
+                setMotPow(0, 0, 0, 0, 0);
+                targetDistance = 0;
+                return true;
+            } else {                                                // run it forward
+                this.setMotPow(0.3, 0.3, 0.3, 0.3, 1);
+                return false;
+            }
         }
     }
-
 
     public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult, int robotConfig)
     // 0 = bogg, 1 = home robot, 2 = eliot
@@ -203,32 +235,6 @@ public class Drivetrain {
         }
     }
 
-    public boolean moveForwardInches(int distance){
-        int distanceTicks;
-        if(targetDistance == 0){        // Move not started yet
-            targetDistance = distance;
-            return false;
-        } else {
-            distanceTicks = (int)(distance*ticksPerInch);
-            flMot.setTargetPosition(distanceTicks);
-            blMot.setTargetPosition(distanceTicks);
-            frMot.setTargetPosition(distanceTicks);
-            brMot.setTargetPosition(distanceTicks);
-            this.setMotRTP();
-            if (flMot.getCurrentPosition() >= distanceTicks){       // all done
-                setMotPow(0,0,0,0,0);
-                targetDistance = 0;
-                return true;
-            } else {                                                // run it forward
-                this.setMotPow(0.3,0.3,0.3,0.3, 1);
-                return false;
-            }
-        }
-
-
-
-
-    }
     public void moveReverseInches(int distance){
         int distanceTicks = (int) (distance*ticksPerInch);
         flMot.setTargetPosition(-distanceTicks);

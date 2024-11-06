@@ -45,8 +45,6 @@ public class Lift {
     //Move up or down as commanded by joystick.  Stop when joystick is 0 and hold position.
     public void movSlide(double speedCmd){
         //linear slide
-        positionLinearSlideMotorAvg = (int)((positionLinearSlideMotorLeft + positionLinearSlideMotorRight)/2);
-
         if (speedCmd == 0){
             holdPosition(positionLinearSlideMotorLeft, positionLinearSlideMotorRight);
         } else if ((positionLinearSlideMotorLeft < positionLinearSlideMotorMinLeft) && (speedCmd < 0)){
@@ -76,14 +74,24 @@ public class Lift {
             return false;
         }
     }
-    public void moveSimple(double speedCmd){
-        linearSlideMotorLeft.setPower(speedCmd);
-        linearSlideMotorRight.setPower(speedCmd);
-    }
 
-    public void setToEnc(){
-        linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public boolean liftTransit (int position){
+        linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        linearSlideMotorRight.setPower(linearSlideMotorLeft.getCurrentPosition());
+        if (linearSlideMotorLeft.getCurrentPosition() == position) {
+            linearSlideMotorLeft.setTargetPosition(position);
+            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            return true;
+        } else if (position > linearSlideMotorLeft.getCurrentPosition()){
+            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            linearSlideMotorLeft.setPower(1);
+            return false;
+        } else if (position < linearSlideMotorLeft.getCurrentPosition()){
+            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            linearSlideMotorLeft.setPower(-1);
+            return false;
+        }
+        return false;
     }
 
     public int getLeftPos(){
