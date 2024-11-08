@@ -10,20 +10,25 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+// Enum used to track which robot we're running on now
+enum Robot{
+    BOGG, ELIOT, MERRICK
+}
+
 public class Drivetrain {
-   public DcMotor flMot = null;
-   public DcMotor blMot = null;
-   public DcMotor frMot = null;
-   public DcMotor brMot = null;
-   public IMU imu;
-   public double targetHeading;
-   public int targetDistance;
-    int encoderResolution = 440; /* for the rev motors, the resolution is 440
-                                 for bogg (yellowJacket) the resolution is 550*/
+    // TODO: Select the robot programmatically.
+    private Robot whichRobot = Robot.ELIOT;   // Change this to specify the robot we're using
+    public DcMotor flMot = null;
+    public DcMotor blMot = null;
+    public DcMotor frMot = null;
+    public DcMotor brMot = null;
+    public IMU imu;
+    public double targetHeading;
+    public int targetDistance;
+    int encoderResolution;
+    double ticksPerInch;
 
-    double ticksPerInch = encoderResolution/(4.1*Math.PI);
-
-
+    // Constructor
     public Drivetrain(HardwareMap hwMap, int robotConfig) {
 
         flMot = hwMap.dcMotor.get("frontLeftMotor");
@@ -35,24 +40,44 @@ public class Drivetrain {
         blMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        
+        // TODO: Change the constructor to take the enum as the argument, update all instances.
+        switch (robotConfig) {       // 0 = bogg, 1 = home, 2 = eliot
+            case 0:
+                whichRobot = Robot.BOGG;
+                break;
+            case 1:
+                whichRobot = Robot.MERRICK;
+                break;
+            case 2:
+                whichRobot = Robot.ELIOT;
+                break;
+        }
 
-        if (robotConfig == 0) { // 0 = bogg, 1 = home, 2 = eliot
-            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            frMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
-        } else if (robotConfig == 1) {
-            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            blMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        switch (whichRobot){
+            case BOGG:
+                flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                frMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                encoderResolution= 550; // for bogg (yellowJacket) the resolution is 550
+                break;
+            case MERRICK:
+                flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                blMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                encoderResolution= 550;
+                break;
+            case ELIOT:
+                flMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                brMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                encoderResolution= 440; // for the rev motors, the resolution is 440
+                break;
         }
-        else if (robotConfig == 2) {
-            flMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            brMot.setDirection(DcMotorSimple.Direction.FORWARD);
-        }
+        ticksPerInch = encoderResolution/(4.1*Math.PI);
         frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
