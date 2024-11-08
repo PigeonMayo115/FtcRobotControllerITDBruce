@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.custom;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -18,10 +16,10 @@ enum Robot{
 public class Drivetrain {
     // TODO: Select the robot programmatically.
     private Robot whichRobot = Robot.ELIOT;   // Change this to specify the robot we're using
-    public DcMotor flMot = null;
-    public DcMotor blMot = null;
-    public DcMotor frMot = null;
-    public DcMotor brMot = null;
+    public DcMotor flMot;
+    public DcMotor blMot;
+    public DcMotor frMot;
+    public DcMotor brMot;
     public IMU imu;
     public double targetHeading;
     public int targetDistance;
