@@ -162,10 +162,10 @@ public class ITDMainAutonomousLeftTest extends OpMode
                 }
                 break;
             case 20: //turn right 90 degrees
-                //stepDone = myDrivetrain.turnToHeading(90);
+                stepDone = myDrivetrain.turnToHeading(90);
                 //stepDone = myDrivetrain.dumbTurn(90);
-                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 90);
-                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
+                //stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 90);
+                //myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
                 if (stepDone){// clear the encoders
                     step = 30;
                     myDrivetrain.setMotPow(0,0,0,0,1);
@@ -222,7 +222,7 @@ public class ITDMainAutonomousLeftTest extends OpMode
             case 100:
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if (stepDone){
-                    myDrivetrain.setTargetHeading(0);
+                    //myDrivetrain.setTargetHeading(0);
                     step = 110;
 
                 }
@@ -261,6 +261,7 @@ public class ITDMainAutonomousLeftTest extends OpMode
                     step = 150;
                     myDrivetrain.setTargetHeading(-90);
                 }
+                break;
 
         }
 

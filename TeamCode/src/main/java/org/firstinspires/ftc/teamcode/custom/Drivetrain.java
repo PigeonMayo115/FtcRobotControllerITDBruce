@@ -8,14 +8,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-// Enum used to track which robot we're running on now
-enum Robot{
-    BOGG, ELIOT, MERRICK
-}
-
 public class Drivetrain {
-    // TODO: Select the robot programmatically.
-    private Robot whichRobot = Robot.ELIOT;   // Change this to specify the robot we're using
     public DcMotor flMot;
     public DcMotor blMot;
     public DcMotor frMot;
@@ -26,8 +19,24 @@ public class Drivetrain {
     int encoderResolution;
     double ticksPerInch;
 
+    // Enum used to track which robot we're running on now
+    // TODO: Select the robot programmatically.
+    public enum Robot{
+        BOGG, ELIOT, MERRICK
+    }
+
+    // Enum for turn direction
+    public enum Turn{
+        LEFT, RIGHT
+    }
+
+    // Overload constructor for robotConfig by int
+    public Drivetrain(HardwareMap hwMap, int robotConfig){
+        this(hwMap, getWhichRobot(robotConfig));
+    }
+
     // Constructor
-    public Drivetrain(HardwareMap hwMap, int robotConfig) {
+    public Drivetrain(HardwareMap hwMap, Robot robotConfig) {
 
         flMot = hwMap.dcMotor.get("frontLeftMotor");
         blMot = hwMap.dcMotor.get("backLeftMotor");
@@ -38,21 +47,11 @@ public class Drivetrain {
         blMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        
-        // TODO: Change the constructor to take the enum as the argument, update all instances.
-        switch (robotConfig) {       // 0 = bogg, 1 = home, 2 = eliot
-            case 0:
-                whichRobot = Robot.BOGG;
-                break;
-            case 1:
-                whichRobot = Robot.MERRICK;
-                break;
-            case 2:
-                whichRobot = Robot.ELIOT;
-                break;
-        }
 
-        switch (whichRobot){
+        RevHubOrientationOnRobot revOrientation;
+
+        // Motor Setup
+        switch (robotConfig){
             case BOGG:
                 flMot.setDirection(DcMotorSimple.Direction.FORWARD);
                 blMot.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -61,10 +60,10 @@ public class Drivetrain {
                 encoderResolution= 550; // for bogg (yellowJacket) the resolution is 550
                 break;
             case MERRICK:
-                flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                flMot.setDirection(DcMotorSimple.Direction.REVERSE);
                 blMot.setDirection(DcMotorSimple.Direction.REVERSE);
                 frMot.setDirection(DcMotorSimple.Direction.FORWARD);
-                brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                brMot.setDirection(DcMotorSimple.Direction.FORWARD);
                 encoderResolution= 550;
                 break;
             case ELIOT:
@@ -81,13 +80,48 @@ public class Drivetrain {
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
 
-        imu = hwMap.get(IMU.class, "imu");
+        // IMU Setup
+        switch(robotConfig){
+            case ELIOT:
+                imu = hwMap.get(IMU.class, "imu");
+                revOrientation = new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
+                imu.initialize(new IMU.Parameters(revOrientation));
+                break;
+            case BOGG:
+                // TODO: make a case for bogg
+                break;
+            case MERRICK:       // Uses the Sparkfun OTOS IMU
+                revOrientation = new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                IMU sfIMU = new SparkFunIMU(hwMap, "sensor_otos", revOrientation);
+                hwMap.put("imu", sfIMU);
+                imu = hwMap.get(IMU.class, "imu");
+                imu.initialize(new IMU.Parameters(revOrientation));
+                break;
+        }
 
-        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
-                //this is correct for eliot TODO: make a case for bogg, home robot does not have a built in imu
-        imu.initialize(new IMU.Parameters(revOrientation));
+    }
+
+    private static Robot getWhichRobot(int robotNum){
+        Robot whichRobot;
+        switch (robotNum) {       // 0 = bogg, 1 = home, 2 = eliot
+            case 0:
+                whichRobot = Robot.BOGG;
+                break;
+            case 1:
+                whichRobot = Robot.MERRICK;
+                break;
+            case 2:
+                whichRobot = Robot.ELIOT;
+                break;
+            default:
+                whichRobot = Robot.BOGG;
+                break;
+        }
+        return whichRobot;
     }
 
     public void driveLeft(double spdMult) {
@@ -110,31 +144,40 @@ public class Drivetrain {
         return imu.getRobotYawPitchRollAngles().getYaw(angleUnit);
     }
 
-    public void setTargetHeading(double degrees){
-        double startHeading = getHeading(AngleUnit.DEGREES);
-        double overShootAdjuster = 11.0;        // seems to overshoot by 11 degrees
-        targetHeading = startHeading + degrees; //if result is >180 degrees, fix it!
-
-        if (degrees < 0) { targetHeading = (targetHeading + overShootAdjuster);}
-        if (degrees > 0){ targetHeading = (targetHeading - overShootAdjuster);}
-
-        if(targetHeading>180){
-            targetHeading = targetHeading-360;
-        } else if (targetHeading<-180){
-            targetHeading = targetHeading+ 360;
-        }
+    // TODO: Get rid of this
+    public void setTargetHeading(double heading){
+        return;
     }
 
-    //turn the robot to the LEFT if positive, right if negative
-    //returns true if move is complete
-    public boolean turnToHeading(double degrees){
+    // Overload: If direction is not specified, always turn left.
+    public boolean turnToHeading(double heading){
+        return turnToHeading(heading, Turn.LEFT);
+    }
 
-        setMotRUE();        // Run Using Encoder
+    //turn to the specified heading by turning in the specified direction
+    //  If turn is left, done when heading is > target
+    //  If turn is right, done when heading is < target
+    //  Special case when crossing over 180:
+    //  - If Turning Left, and target < starting or if turning right, and target > starting
+    //  - Then must turn past 180 before looking for done.
+    public boolean turnToHeading(double heading, Turn direction){
 
-        //now we are going to do the turn
-        if(degrees>0){
+        double overShootAdjuster = 8.0;        // seems to overshoot by 11 degrees
+        double currentHeading = getHeading(AngleUnit.DEGREES);
+        setMotRUE();                            // Run Using Encoder
+
+        if(direction == Turn.LEFT && heading < currentHeading){
+            setMotPow(-0.3,-0.3,0.3,0.3,1);
+            return false;
+        }
+        if (direction == Turn.RIGHT && heading > currentHeading) {
+            setMotPow(0.3,0.3,-0.3,-0.3,1);
+            return false;
+        }
+
+        if(direction == Turn.LEFT){
             //we are turning left
-            if(getHeading(AngleUnit.DEGREES)<targetHeading){
+            if(getHeading(AngleUnit.DEGREES)<(heading-overShootAdjuster)){
                 setMotPow(-0.3,-0.3,0.3,0.3,1);
                 return false;
             } else {
@@ -142,9 +185,9 @@ public class Drivetrain {
                 return true;
             }
         }
-        if (degrees<0){
+        if (direction == Turn.RIGHT){
             //we are turning right
-            if(getHeading(AngleUnit.DEGREES)>targetHeading){
+            if(getHeading(AngleUnit.DEGREES)>(heading+overShootAdjuster)){
                 setMotPow(0.3,0.3,-0.3,-0.3,1);
                 return false;
             } else {
@@ -152,7 +195,7 @@ public class Drivetrain {
                 return true;
             }
         } else {
-            return true;
+            return false;
         }
     }
     public boolean dumbTurn(double degrees){
