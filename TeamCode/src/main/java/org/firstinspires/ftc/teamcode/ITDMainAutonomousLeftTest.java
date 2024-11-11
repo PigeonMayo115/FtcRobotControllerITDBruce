@@ -39,6 +39,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.custom.ArmMotor;
 import org.firstinspires.ftc.teamcode.custom.CrServo;
 import org.firstinspires.ftc.teamcode.custom.Drivetrain;
+import org.firstinspires.ftc.teamcode.custom.DummyMotor;
 import org.firstinspires.ftc.teamcode.custom.Lift;
 
 /*
@@ -66,10 +67,17 @@ public class ITDMainAutonomousLeftTest extends OpMode
     int step = 0;
     boolean stepDone = false;
     ElapsedTime runtime = new ElapsedTime();
+    Drivetrain.Robot whichRobot;
 
     @Override
     public void init() {
-        myDrivetrain = new Drivetrain(hardwareMap, 0);
+        whichRobot = Drivetrain.Robot.MERRICK;      // Change it here if running on other robot
+        if (whichRobot == Drivetrain.Robot.MERRICK){ // Set up dummy motors for lift and arm
+            hardwareMap.put("linearSlideMotorLeft", (DcMotor)new DummyMotor());
+            hardwareMap.put("linearSlideMotorRight", (DcMotor)new DummyMotor());
+            hardwareMap.put("armMotor", (DcMotor)new DummyMotor());
+        }
+        myDrivetrain = new Drivetrain(hardwareMap, whichRobot);
         myCrServo = new CrServo(hardwareMap);
         myLift = new Lift(hardwareMap);
         myArmMotor = new ArmMotor(hardwareMap);
@@ -133,20 +141,20 @@ public class ITDMainAutonomousLeftTest extends OpMode
                 myDrivetrain.setMotSRE();       // clear the encoders
                 step = 5;
                 break;
-            case 5:
+            case 5:                             // retract the wrist
                 wristServo.setPosition(1);
                 stepDone = (wristServo.getPosition() == 1);
                 if(stepDone){
                     step = 6;
                 }
                 break;
-            case 6:
+            case 6:                             // lift the arm some
                 stepDone = myArmMotor.armGoToAngle(-400);
                 if (stepDone){
                     step = 7;
                 }
                 break;
-            case 7:
+            case 7:                             // center the wrist
                 wristServo.setPosition(0.5);
                 stepDone = (wristServo.getPosition() == 0.5);
                 if (stepDone){
@@ -154,112 +162,95 @@ public class ITDMainAutonomousLeftTest extends OpMode
                 }
                 break;
 
-            case 10://forwards 6 inches
+            case 10:                            //forward 6 inches
                 stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
-                    //myDrivetrain.setTargetHeading(90);
                     step = 20;
                 }
                 break;
-            case 20: //turn right 90 degrees
+            case 20:                            //turn left 90 degrees
                 stepDone = myDrivetrain.turnToHeading(90);
-                //stepDone = myDrivetrain.dumbTurn(90);
-                //stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 90);
-                //myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
-                if (stepDone){// clear the encoders
+                if (stepDone){
                     step = 30;
-                    myDrivetrain.setMotPow(0,0,0,0,1);
                 }
                 break;
-            case 30: //forward 39 inches
+            case 30:                            //forward 39 inches
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if(stepDone){
-                    //myDrivetrain.setTargetHeading(135);
                     step = 40;
                 }
                 break;
-            case 40:
-                //stepDone = myDrivetrain.turnToHeading(135);
-                //stepDone = myDrivetrain.dumbTurn(135);
-                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 135);
-                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
+            case 40:                            //turn toward baskets
+                stepDone = myDrivetrain.turnToHeading(135);
                 if (stepDone){
                     step = 50;
                 }
                 break;
-            case 50:
+            case 50:                            //move to baskets
                 stepDone = myDrivetrain.moveForwardInches(10);
                 if (stepDone){
                     step = 60;
                 }
                 break;
-            case 60:
+            case 60:                            //extend arm
                 stepDone = myArmMotor.armGoToAngle(-3220);
                 if (stepDone){
                     step = 70;
                 }
                 break;
-            case 70:
+            case 70:                            //raise lift
                 stepDone = myLift.holdPosition(1610,1610);
                 if (stepDone){
                     step = 80;
                 }
                 break;
-            case 80:
+            case 80:                            //spit out sample
                 stepDone = myCrServo.spit(1,time);
                 if (stepDone){
                     step = 90;
                 }
                 break;
-            case 90:
-                //stepDone = myDrivetrain.turnToHeading(-45);
-                stepDone = ((myDrivetrain.getHeading(AngleUnit.DEGREES) >= -45)&&(myDrivetrain.getHeading(AngleUnit.DEGREES))<=0);
-                myDrivetrain.setMotPow(0.3,0.3,-0.3,-0.3,1);
+                // TODO: I think you need to lower the lift before you start driving again
+            case 90:                            //turn away from baskets
+                stepDone = myDrivetrain.turnToHeading(-45);
                 if (stepDone){
                     step = 100;
                 }
                 break;
-            case 100:
+            case 100:                           //drive toward submersible
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if (stepDone){
-                    //myDrivetrain.setTargetHeading(0);
                     step = 110;
-
                 }
                 break;
-            case 110:
-                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) >= 0);
-                myDrivetrain.setMotPow(-0.3,-0.3,0.3,0.3,1);
+            case 110:                           //turn parallel to submersible
+                stepDone = myDrivetrain.turnToHeading(0);
                 if (stepDone){
                     step = 120;
                 }
                 break;
-            case 120:
+            case 120:                           //drive along submersible
                 stepDone = myDrivetrain.moveForwardInches( 24);
                 if (stepDone){
-                    //myDrivetrain.setTargetHeading(-90);
                     step = 130;
                 }
                 break;
-            case 130:
-                //stepDone = myDrivetrain.turnToHeading(-90);
-                stepDone = (myDrivetrain.getHeading(AngleUnit.DEGREES) <= -90);
-                myDrivetrain.setMotPow(0.3,0.3,-0.3,-0.3,1);
+            case 130:                           //turn toward submersible
+                stepDone = myDrivetrain.turnToHeading(-90, Drivetrain.Turn.RIGHT);
                 if (stepDone){
                     step = 135;
                 }
                 break;
-            case 135:
+            case 135:                           //drop lift (I think this needs to be done around step 90)
                 stepDone = myLift.holdPosition(0,0);
                 if (stepDone){
                     step = 140;
                 }
                 break;
-            case 140:
+            case 140:                           //extend arm to touch the bar
                 stepDone = myArmMotor.armGoToAngle(-4000);
                 if (stepDone) {
                     step = 150;
-                    myDrivetrain.setTargetHeading(-90);
                 }
                 break;
 

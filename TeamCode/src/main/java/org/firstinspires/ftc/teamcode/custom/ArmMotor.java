@@ -12,7 +12,7 @@ public class ArmMotor {
     private int armMotPosMax = 0;
     private int armMotPosMin = 0;
     public ArmMotor(HardwareMap hwMap) {
-        armMot = hwMap.dcMotor.get("armMotor");
+        armMot = hwMap.get(DcMotor.class, "armMotor");
         armMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armMot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armMot.setDirection(DcMotorSimple.Direction.REVERSE);

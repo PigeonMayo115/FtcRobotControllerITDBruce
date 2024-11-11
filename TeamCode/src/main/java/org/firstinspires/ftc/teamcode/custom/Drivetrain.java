@@ -272,6 +272,7 @@ public class Drivetrain {
     public boolean moveForwardInches(int distance){
         int distanceTicks;
         if(targetDistance == 0){        // Move not started yet
+            setMotSRE();                // Clear the encoders
             targetDistance = distance;
             return false;
         } else {

@@ -18,8 +18,8 @@ public class Lift {
     
     //Constructor
     public Lift(HardwareMap hwMap) {
-        linearSlideMotorLeft = hwMap.dcMotor.get("linearSlideMotorLeft");
-        linearSlideMotorRight = hwMap.dcMotor.get("linearSlideMotorRight");
+        linearSlideMotorLeft = hwMap.get(DcMotor.class, "linearSlideMotorLeft");
+        linearSlideMotorRight = hwMap.get(DcMotor.class, "linearSlideMotorRight");
         linearSlideMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
         linearSlideMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         positionLinearSlideMotorMinLeft = linearSlideMotorLeft.getCurrentPosition();
