@@ -1,30 +1,43 @@
+
 package org.firstinspires.ftc.teamcode.custom;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Drivetrain {
-   public DcMotor flMot = null;
-   public DcMotor blMot = null;
-   public DcMotor frMot = null;
-   public DcMotor brMot = null;
-   public IMU imu;
-   public double targetHeading;
-   public int targetDistance;
-    int encoderResolution = 440; /* for the rev motors, the resolution is 440
-                                 for bogg (yellowJacket) the resolution is 550*/
+    public DcMotor flMot;
+    public DcMotor blMot;
+    public DcMotor frMot;
+    public DcMotor brMot;
+    public IMU imu;
+    public double targetHeading;
+    public int targetDistance;
+    int encoderResolution;
+    double ticksPerInch;
 
-    double ticksPerInch = encoderResolution/(4.1*Math.PI);
+    // Enum used to track which robot we're running on now
+    // TODO: Select the robot programmatically.
+    public enum Robot{
+        BOGG, ELIOT, MERRICK
+    }
 
+    // Enum for turn direction
+    public enum Turn{
+        LEFT, RIGHT
+    }
 
-    public Drivetrain(HardwareMap hwMap, int robotConfig) {
+    // Overload constructor for robotConfig by int
+    public Drivetrain(HardwareMap hwMap, int robotConfig){
+        this(hwMap, getWhichRobot(robotConfig));
+    }
+
+    // Constructor
+    public Drivetrain(HardwareMap hwMap, Robot robotConfig) {
 
         flMot = hwMap.dcMotor.get("frontLeftMotor");
         blMot = hwMap.dcMotor.get("backLeftMotor");
@@ -36,35 +49,80 @@ public class Drivetrain {
         flMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         brMot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (robotConfig == 0) { // 0 = bogg, 1 = home, 2 = eliot
-            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            frMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
-        } else if (robotConfig == 1) {
-            flMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            blMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+        RevHubOrientationOnRobot revOrientation;
+
+        // Motor Setup
+        switch (robotConfig){
+            case BOGG:
+                flMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                frMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                brMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                encoderResolution= 550; // for bogg (yellowJacket) the resolution is 550
+                break;
+            case MERRICK:
+                flMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                blMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                brMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                encoderResolution= 550;
+                break;
+            case ELIOT:
+                flMot.setDirection(DcMotorSimple.Direction.REVERSE);
+                blMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                frMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                brMot.setDirection(DcMotorSimple.Direction.FORWARD);
+                encoderResolution= 440; // for the rev motors, the resolution is 440
+                break;
         }
-        else if (robotConfig == 2) {
-            flMot.setDirection(DcMotorSimple.Direction.REVERSE);
-            blMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            frMot.setDirection(DcMotorSimple.Direction.FORWARD);
-            brMot.setDirection(DcMotorSimple.Direction.FORWARD);
-        }
+        ticksPerInch = encoderResolution/(4.1*Math.PI);
         frMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         blMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         flMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         brMot.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
 
-        imu = hwMap.get(IMU.class, "imu");
+        // IMU Setup
+        switch(robotConfig){
+            case ELIOT:
+                imu = hwMap.get(IMU.class, "imu");
+                revOrientation = new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
+                imu.initialize(new IMU.Parameters(revOrientation));
+                break;
+            case BOGG:
+                // TODO: make a case for bogg
+                break;
+            case MERRICK:       // Uses the Sparkfun OTOS IMU
+                /*revOrientation = new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                IMU sfIMU = new SparkFunIMU(hwMap, "sensor_otos", revOrientation);
+                hwMap.put("imu", sfIMU);
+                imu = hwMap.get(IMU.class, "imu");
+                imu.initialize(new IMU.Parameters(revOrientation)); */
+                break;
+        }
 
-        RevHubOrientationOnRobot revOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
-                //this is correct for eliot TODO: make a case for bogg, home robot does not have a built in imu
-        imu.initialize(new IMU.Parameters(revOrientation));
+    }
+
+    private static Robot getWhichRobot(int robotNum){
+        Robot whichRobot;
+        switch (robotNum) {       // 0 = bogg, 1 = home, 2 = eliot
+            case 0:
+                whichRobot = Robot.BOGG;
+                break;
+            case 1:
+                whichRobot = Robot.MERRICK;
+                break;
+            case 2:
+                whichRobot = Robot.ELIOT;
+                break;
+            default:
+                whichRobot = Robot.BOGG;
+                break;
+        }
+        return whichRobot;
     }
 
     public void driveLeft(double spdMult) {
@@ -87,101 +145,78 @@ public class Drivetrain {
         return imu.getRobotYawPitchRollAngles().getYaw(angleUnit);
     }
 
-    public void setTargetHeading(double degrees){
-        double startHeading = getHeading(AngleUnit.DEGREES);
-        double overShootAdjuster = 11.0;        // seems to overshoot by 11 degrees
-        targetHeading = startHeading + degrees; //if result is >180 degrees, fix it!
-
-        if (degrees < 0) { targetHeading = (targetHeading + overShootAdjuster);}
-        if (degrees > 0){ targetHeading = (targetHeading - overShootAdjuster);}
-
-        if(targetHeading>180){
-            targetHeading = targetHeading-360;
-        } else if (targetHeading<-180){
-            targetHeading = targetHeading+ 360;
-        }
+    // TODO: Get rid of this
+    public void setTargetHeading(double heading){
+        return;
     }
 
-    //turn the robot to the LEFT if positive, right if negative
-    //returns true if move is complete
-    public boolean turnToHeading(double degrees) {
-        boolean done = false;
-        setMotRUE(); // Run Using Encoder
-        if (targetHeading == 0) {
-
-            double startHeading = getHeading(AngleUnit.DEGREES);
-            double overShootAdjuster = 11.0;        // seems to overshoot by 11 degrees
-            targetHeading = startHeading + degrees; //if result is >180 degrees, fix it!
-
-            if (degrees < 0) {
-                targetHeading = (targetHeading + overShootAdjuster);
-            }
-            if (degrees > 0) {
-                targetHeading = (targetHeading - overShootAdjuster);
-            }
-
-            if (targetHeading > 180) {
-                targetHeading = targetHeading - 360;
-            } else if (targetHeading < -180) {
-                targetHeading = targetHeading + 360;
-            }
-            done = false;
-        } else if (targetHeading != 0) {
-            //now we are going to do the turn
-            if (degrees > 0) {
-                //we are turning left
-                if (getHeading(AngleUnit.DEGREES) < targetHeading) {
-                    setMotPow(-0.3, -0.3, 0.3, 0.3, 1);
-                    done = false;
-                } else {
-                    done = true;
-                }
-            }
-            if (degrees < 0) {
-                //we are turning right
-                if (getHeading(AngleUnit.DEGREES) > targetHeading) {
-                    setMotPow(0.3, 0.3, -0.3, -0.3, 1);
-                    done = false;
-                } else {
-                    done = true;
-                }
-            }
-        }
-        if (done){
-            setMotPow(0,0,0,0,0);
-            targetHeading = 0;
-        }
-        return done;
+    // Overload: If direction is not specified, always turn left.
+    public boolean turnToHeading(double heading){
+        return turnToHeading(heading, Turn.LEFT);
     }
-    public boolean moveForwardInches(int distance) {
-        int distanceTicks;
-        if (targetDistance == 0) {        // Move not started yet
-            targetDistance = distance;
+
+    //turn to the specified heading by turning in the specified direction
+    //  If turn is left, done when heading is > target
+    //  If turn is right, done when heading is < target
+    //  Special case when crossing over 180:
+    //  - If Turning Left, and target < starting or if turning right, and target > starting
+    //  - Then must turn past 180 before looking for done.
+    public boolean turnToHeading(double heading, Turn direction){
+
+        double overShootAdjuster = 8.0;        // seems to overshoot by 11 degrees
+        double currentHeading = getHeading(AngleUnit.DEGREES);
+        setMotRUE();                            // Run Using Encoder
+
+        if(direction == Turn.LEFT && heading < currentHeading){
+            setMotPow(-0.3,-0.3,0.3,0.3,1);
             return false;
-        } else {
-            distanceTicks = (int) (distance * ticksPerInch);
-            flMot.setTargetPosition(distanceTicks);
-            blMot.setTargetPosition(distanceTicks);
-            frMot.setTargetPosition(distanceTicks);
-            brMot.setTargetPosition(distanceTicks);
-            this.setMotRTP();
-            if (flMot.getCurrentPosition() >= distanceTicks) {       // all done
-                setMotPow(0, 0, 0, 0, 0);
-                targetDistance = 0;
-                return true;
-            } else {                                                // run it forward
-                this.setMotPow(0.3, 0.3, 0.3, 0.3, 1);
+        }
+        if (direction == Turn.RIGHT && heading > currentHeading) {
+            setMotPow(0.3,0.3,-0.3,-0.3,1);
+            return false;
+        }
+
+        if(direction == Turn.LEFT){
+            //we are turning left
+            if(getHeading(AngleUnit.DEGREES)<(heading-overShootAdjuster)){
+                setMotPow(-0.3,-0.3,0.3,0.3,1);
                 return false;
+            } else {
+                setMotPow(0,0,0,0,0);
+                return true;
             }
         }
+        if (direction == Turn.RIGHT){
+            //we are turning right
+            if(getHeading(AngleUnit.DEGREES)>(heading+overShootAdjuster)){
+                setMotPow(0.3,0.3,-0.3,-0.3,1);
+                return false;
+            } else {
+                setMotPow(0,0,0,0,0);
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
+    public boolean dumbTurn(double degrees){
+        setMotRUE();
+        if (getHeading(AngleUnit.DEGREES)==degrees){
+            setMotPow(0,0,0,0,0);
+            return true;
+        }else{
+            setMotPow(0.1,0.1,-0.1,-0.1,1 );
+            return false;
+        }
+    }
+
 
     public void stickDrive(double xCmd, double yCmd, double rxCmd, double spdMult, int robotConfig)
     // 0 = bogg, 1 = home robot, 2 = eliot
     {
         double denominator = Math.max(Math.abs(yCmd) + Math.abs(xCmd) + Math.abs(rxCmd), 1);
         xCmd = xCmd*-1;
-        
+
         if (robotConfig == 0) {
             setMotPow(
                     (yCmd + xCmd - rxCmd) / denominator,
@@ -190,12 +225,12 @@ public class Drivetrain {
                     (yCmd + xCmd + rxCmd) / denominator,
                     spdMult);
         } else if (robotConfig == 1){
-                setMotPow(
-                        (yCmd + xCmd + rxCmd) / denominator,
-                (yCmd - xCmd - rxCmd) / denominator,
-                (yCmd - xCmd + rxCmd) / denominator,
-                (yCmd + xCmd - rxCmd) / denominator,
-                spdMult);
+            setMotPow(
+                    (yCmd + xCmd + rxCmd) / denominator,
+                    (yCmd - xCmd - rxCmd) / denominator,
+                    (yCmd - xCmd + rxCmd) / denominator,
+                    (yCmd + xCmd - rxCmd) / denominator,
+                    spdMult);
         } else if (robotConfig == 2){
             setMotPow(
                     (yCmd + xCmd + rxCmd) / denominator,
@@ -205,9 +240,9 @@ public class Drivetrain {
                     spdMult);
         }
 
-        
+
     }
-    
+
 
     public void setMotPow(double flMotPow, double blMotPow, double frMotPow, double brMotPow, double spdMult) {
         flMot.setPower(flMotPow * spdMult);
@@ -235,6 +270,33 @@ public class Drivetrain {
         }
     }
 
+    public boolean moveForwardInches(int distance){
+        int distanceTicks;
+        if(targetDistance == 0){        // Move not started yet
+            setMotSRE();                // Clear the encoders
+            targetDistance = distance;
+            return false;
+        } else {
+            distanceTicks = (int)(distance*ticksPerInch);
+            flMot.setTargetPosition(distanceTicks);
+            blMot.setTargetPosition(distanceTicks);
+            frMot.setTargetPosition(distanceTicks);
+            brMot.setTargetPosition(distanceTicks);
+            this.setMotRTP();
+            if (flMot.getCurrentPosition() >= distanceTicks){       // all done
+                setMotPow(0,0,0,0,0);
+                targetDistance = 0;
+                return true;
+            } else {                                                // run it forward
+                this.setMotPow(0.3,0.3,0.3,0.3, 1);
+                return false;
+            }
+        }
+
+
+
+
+    }
     public void moveReverseInches(int distance){
         int distanceTicks = (int) (distance*ticksPerInch);
         flMot.setTargetPosition(-distanceTicks);
@@ -260,7 +322,7 @@ public class Drivetrain {
         this.setMotRTP();
     }
 
-    
+
     public void setMotRTP(){
         flMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         blMot.setMode(DcMotor.RunMode.RUN_TO_POSITION);

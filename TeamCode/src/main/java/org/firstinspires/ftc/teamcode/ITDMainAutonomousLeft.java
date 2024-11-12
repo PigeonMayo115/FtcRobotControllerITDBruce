@@ -113,6 +113,7 @@ public class ITDMainAutonomousLeft extends OpMode
     @Override
     public void loop() {
 
+
         telemetry.addData("heading",myDrivetrain.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         telemetry.addData("step: ",step);
         telemetry.addData("fl motor target", myDrivetrain.flMot.getTargetPosition());
@@ -125,8 +126,8 @@ public class ITDMainAutonomousLeft extends OpMode
 
 
         /* move forward, turn left, move forward, turn towards the basket, move forward,
-        * extend arm motor, extend linear slide, spit out block, turn, drive to chamber,
-        * turn, keep going, turn, move towards rung, move arm to touch low rung */
+         * extend arm motor, extend linear slide, spit out block, turn, drive to chamber,
+         * turn, keep going, turn, move towards rung, move arm to touch low rung */
 
         switch(step){
             case 0:
@@ -134,20 +135,20 @@ public class ITDMainAutonomousLeft extends OpMode
                 myDrivetrain.setMotSRE();       // clear the encoders
                 step = 5;
                 break;
-            case 5:
+            case 5:                             // retract the wrist
                 wristServo.setPosition(1);
                 stepDone = (wristServo.getPosition() == 1);
                 if(stepDone){
                     step = 6;
                 }
                 break;
-            case 6:
-                stepDone = myArmMotor.armGoToAngle(-600);
+            case 6:                             // lift the arm some
+                stepDone = myArmMotor.armGoToAngle(-400);
                 if (stepDone){
                     step = 7;
                 }
                 break;
-            case 7:
+            case 7:                             // center the wrist
                 wristServo.setPosition(0.5);
                 stepDone = (wristServo.getPosition() == 0.5);
                 if (stepDone){
@@ -155,95 +156,97 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
 
-            case 10://forwards 6 inches
+            case 10:                            //forward 6 inches
                 stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
                     step = 20;
                 }
                 break;
-            case 20: //turn right 90 degrees
+            case 20:                            //turn left 90 degrees
                 stepDone = myDrivetrain.turnToHeading(90);
-                if (stepDone){// clear the encoders
+                if (stepDone){
                     step = 30;
                 }
                 break;
-            case 30: //forward 39 inches
+            case 30:                            //forward 39 inches
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if(stepDone){
                     step = 40;
                 }
                 break;
-            case 40:
+            case 40:                            //turn toward baskets
                 stepDone = myDrivetrain.turnToHeading(135);
                 if (stepDone){
                     step = 50;
                 }
                 break;
-            case 50:
+            case 50:                            //move to baskets
                 stepDone = myDrivetrain.moveForwardInches(10);
                 if (stepDone){
                     step = 60;
                 }
                 break;
-            case 60:
+            case 60:                            //extend arm
                 stepDone = myArmMotor.armGoToAngle(-3220);
                 if (stepDone){
                     step = 70;
                 }
                 break;
-            case 70:
-                stepDone = myLift.holdPosition(1610,1610);
+            case 70:                            //raise lift
+                stepDone = myLift.liftTransit(1610);
                 if (stepDone){
                     step = 80;
                 }
                 break;
-            case 80:
+            case 80:                            //spit out sample
                 stepDone = myCrServo.spit(1,time);
                 if (stepDone){
                     step = 90;
                 }
                 break;
-            case 90:
+            // TODO: I think you need to lower the lift before you start driving again
+            case 90:                            //turn away from baskets
                 stepDone = myDrivetrain.turnToHeading(-45);
                 if (stepDone){
                     step = 100;
                 }
                 break;
-            case 100:
+            case 100:                           //drive toward submersible
                 stepDone = myDrivetrain.moveForwardInches(24);
                 if (stepDone){
                     step = 110;
                 }
                 break;
-            case 110:
+            case 110:                           //turn parallel to submersible
                 stepDone = myDrivetrain.turnToHeading(0);
                 if (stepDone){
                     step = 120;
                 }
                 break;
-            case 120:
+            case 120:                           //drive along submersible
                 stepDone = myDrivetrain.moveForwardInches( 24);
                 if (stepDone){
                     step = 130;
                 }
                 break;
-            case 130:
-                stepDone = myDrivetrain.turnToHeading(-90);
+            case 130:                           //turn toward submersible
+                stepDone = myDrivetrain.turnToHeading(-90, Drivetrain.Turn.RIGHT);
                 if (stepDone){
                     step = 135;
                 }
                 break;
-            case 135:
-                stepDone = myLift.holdPosition(0,0);
+            case 135:                           //drop lift (I think this needs to be done around step 90)
+                stepDone = myLift.liftTransit(0);
                 if (stepDone){
                     step = 140;
                 }
                 break;
-            case 140:
+            case 140:                           //extend arm to touch the bar
                 stepDone = myArmMotor.armGoToAngle(-4000);
                 if (stepDone) {
                     step = 150;
                 }
+                break;
 
         }
 

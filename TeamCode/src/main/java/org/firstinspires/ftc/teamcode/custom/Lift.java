@@ -77,7 +77,7 @@ public class Lift {
 
     public boolean liftTransit (int position){
         linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        linearSlideMotorRight.setPower(linearSlideMotorLeft.getCurrentPosition());
+        linearSlideMotorRight.setPower(linearSlideMotorLeft.getPower());
         if (linearSlideMotorLeft.getCurrentPosition() == position) {
             linearSlideMotorLeft.setTargetPosition(position);
             linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
