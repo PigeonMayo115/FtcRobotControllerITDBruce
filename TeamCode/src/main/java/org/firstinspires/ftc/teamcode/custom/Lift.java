@@ -102,13 +102,13 @@ public class Lift {
         return linearSlideMotorLeft.getPower();
     }
 
-    public void liftUpButton (boolean yButton){
-        if (yButton){
+    public void liftUpButton (boolean xButton){
+        if (xButton){
             holdPosition(0, 0);
         }
     }
-    public void liftDownButton (boolean xButton){
-        if (xButton){
+    public void liftDownButton (boolean yButton){
+        if (yButton){
             holdPosition(1610, 1610);
 
         }
