@@ -101,16 +101,26 @@ public class Lift {
     public double getRightPower(){
         return linearSlideMotorLeft.getPower();
     }
-
+// trying a going to position but .5 speed
     public void liftUpButton (boolean xButton){
         if (xButton){
-            holdPosition(0, 0);
+            linearSlideMotorLeft.setTargetPosition(0);
+            linearSlideMotorRight.setTargetPosition(0);
+            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            linearSlideMotorLeft.setPower(.5);
+            linearSlideMotorRight.setPower(.5);
+
         }
     }
     public void liftDownButton (boolean yButton){
         if (yButton){
-            holdPosition(1610, 1610);
-
+            linearSlideMotorLeft.setTargetPosition(1610);
+            linearSlideMotorRight.setTargetPosition(1610);
+            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            linearSlideMotorLeft.setPower(.5);
+            linearSlideMotorRight.setPower(.5);
         }
     }
     // if your not in photography your not cool
