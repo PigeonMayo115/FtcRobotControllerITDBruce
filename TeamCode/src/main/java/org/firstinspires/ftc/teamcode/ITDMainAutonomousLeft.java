@@ -156,14 +156,14 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
 
-            case 10:                            //forward 6 inches
+            case 10:                            //forward 15 inches
                 stepDone = myDrivetrain.moveForwardInches(15);
                 if(stepDone){
                     step = 20;
                 }
                 break;
             case 20:                            //turn left 90 degrees
-                stepDone = myDrivetrain.turnToHeading(90);
+                stepDone = myDrivetrain.turnToHeading(90, Drivetrain.Turn.LEFT);
                 if (stepDone){
                     step = 30;
                 }
@@ -175,7 +175,7 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 40:                            //turn toward baskets
-                stepDone = myDrivetrain.turnToHeading(135);
+                stepDone = myDrivetrain.turnToHeading(135, Drivetrain.Turn.RIGHT);
                 if (stepDone){
                     step = 50;
                 }
@@ -201,12 +201,25 @@ public class ITDMainAutonomousLeft extends OpMode
             case 80:                            //spit out sample
                 stepDone = myCrServo.spit(1,time);
                 if (stepDone){
-                    step = 90;
+                    step = 84;
                 }
                 break;
-            // TODO: I think you need to lower the lift before you start driving again
+            case 84:
+                stepDone = myArmMotor.armGoToAngle(-400);
+                if (stepDone){
+                    step = 87;
+                }
+                break;
+            case 87:
+                stepDone = myLift.liftTransit(0);
+                if (stepDone){
+                    step = 90;
+                    myLift.linearSlideMotorRight.setPower(0);
+                    myLift.linearSlideMotorRight.setPower(0);
+                }
+            // to do (resolved) I think you need to lower the lift before you start driving again
             case 90:                            //turn away from baskets
-                stepDone = myDrivetrain.turnToHeading(-45);
+                stepDone = myDrivetrain.turnToHeading(-45, Drivetrain.Turn.RIGHT);
                 if (stepDone){
                     step = 100;
                 }
@@ -218,7 +231,7 @@ public class ITDMainAutonomousLeft extends OpMode
                 }
                 break;
             case 110:                           //turn parallel to submersible
-                stepDone = myDrivetrain.turnToHeading(0);
+                stepDone = myDrivetrain.turnToHeading(0, Drivetrain.Turn.LEFT);
                 if (stepDone){
                     step = 120;
                 }
@@ -232,15 +245,15 @@ public class ITDMainAutonomousLeft extends OpMode
             case 130:                           //turn toward submersible
                 stepDone = myDrivetrain.turnToHeading(-90, Drivetrain.Turn.RIGHT);
                 if (stepDone){
-                    step = 135;
+                    step = 140;
                 }
                 break;
-            case 135:                           //drop lift (I think this needs to be done around step 90)
+            /*case 135:                           //drop lift (I think this needs to be done around step 90)
                 stepDone = myLift.liftTransit(0);
                 if (stepDone){
                     step = 140;
                 }
-                break;
+                break; */
             case 140:                           //extend arm to touch the bar
                 stepDone = myArmMotor.armGoToAngle(-4000);
                 if (stepDone) {
