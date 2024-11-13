@@ -113,4 +113,5 @@ public class Lift {
 
         }
     }
+    // if your not in photography your not cool
 }
