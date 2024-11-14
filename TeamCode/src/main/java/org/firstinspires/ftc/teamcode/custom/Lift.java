@@ -62,14 +62,16 @@ public class Lift {
             positionLinearSlideMotorRight = linearSlideMotorRight.getCurrentPosition();
         }
     }
-
     public boolean holdPosition(int left, int right){
+        return holdPosition(left, right, 1.0);
+    }
+    public boolean holdPosition(int left, int right, double power){
         linearSlideMotorLeft.setTargetPosition(left);
         linearSlideMotorRight.setTargetPosition(right);
         linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        linearSlideMotorLeft.setPower(1.0);
-        linearSlideMotorRight.setPower(1.0);
+        linearSlideMotorLeft.setPower(power);
+        linearSlideMotorRight.setPower(power);
         if (linearSlideMotorLeft.getCurrentPosition() == left && linearSlideMotorRight.getCurrentPosition() == right){
             return true;
         }else {
@@ -102,26 +104,23 @@ public class Lift {
         return linearSlideMotorLeft.getPower();
     }
 // trying a going to position but .5 speed
-    public void liftUpButton (boolean xButton){
+    public boolean liftUpButton (boolean xButton){
+        boolean done=false;
         if (xButton){
-            linearSlideMotorLeft.setTargetPosition(0);
-            linearSlideMotorRight.setTargetPosition(0);
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorLeft.setPower(.5);
-            linearSlideMotorRight.setPower(.5);
+            done=holdPosition(0, 0, .5);
+
 
         }
+        return done;
     }
-    public void liftDownButton (boolean yButton){
+    public boolean liftDownButton (boolean yButton){
+        boolean done=false;
         if (yButton){
-            linearSlideMotorLeft.setTargetPosition(1610);
-            linearSlideMotorRight.setTargetPosition(1610);
-            linearSlideMotorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linearSlideMotorLeft.setPower(.5);
-            linearSlideMotorRight.setPower(.5);
+            done=holdPosition(1610, 1610, .5);
+
+
         }
+        return done;
     }
     // if your not in photography your not cool
 }
