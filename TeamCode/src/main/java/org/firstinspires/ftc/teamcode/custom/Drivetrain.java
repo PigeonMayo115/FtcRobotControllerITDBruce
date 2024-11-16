@@ -358,5 +358,16 @@ public class Drivetrain {
             brMot.setPower(1);
         }
     }
+    /*
+     if Field Oriented Control:
+     get gyro heading
+     subtract initial offset from heading
+     convert heading to radians (if necessary)
+     new strafe = strafe * cos(heading) - drive * sin(heading)
+     new drive  = strafe * sin(heading) + drive * cos(heading)
 
+     If you want more understanding on where these rotation formulas come
+     from, refer to
+     https://en.wikipedia.org/wiki/Rotation_(mathematics)#Two_dimensions
+     */
 }
